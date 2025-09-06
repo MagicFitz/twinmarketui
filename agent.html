@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>市场测试模式</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body { overflow-x: hidden; }
+    #sidebar { height: 100vh; }
+    #canvasArea { border: 1px solid #ccc; height: 80vh; background: #f9f9f9; position: relative; }
+    .node {
+      position: absolute;
+      padding: 10px 15px;
+      background: #fff;
+      border: 1px solid #333;
+      border-radius: 5px;
+      cursor: move;
+    }
+  </style>
+</head>
+<body>
+  <!-- 顶部标题栏 -->
+  <nav class="navbar navbar-dark bg-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="index.html">← 返回主页面</a>
+      <span class="navbar-text text-white">Agent管理模式</span>
+    </div>
+  </nav>
+
+  <!-- Agent 管理界面 -->
+  <div id="agent" class="container mt-4 hidden">
+    <h2>🤖 Agent 管理界面</h2>
+    <div class="row">
+      <div class="col-md-3">
+        <div class="list-group">
+          <a href="#" class="list-group-item list-group-item-action" onclick="showAgentPanel('home')">Agent 管理首页</a>
+          <a href="#" class="list-group-item list-group-item-action" onclick="showAgentPanel('create')">Agent 创建/导入</a>
+          <a href="#" class="list-group-item list-group-item-action" onclick="showAgentPanel('config')">Agent 配置</a>
+          <a href="#" class="list-group-item list-group-item-action" onclick="showAgentPanel('group')">权限与分组管理</a>
+          <a href="#" class="list-group-item list-group-item-action" onclick="showAgentPanel('monitor')">监控与调度</a>
+        </div>
+      </div>
+      <div class="col-md-9">
+        <div id="agent-home">
+          <div class="card">
+            <div class="card-header">所有 Agent</div>
+            <div class="card-body">
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="card agent-card mb-2">
+                    <div class="card-body">散户 Agent 1</div>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="card agent-card mb-2">
+                    <div class="card-body">机构 Agent A</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div id="agent-create" class="hidden">
+          <div class="card">
+            <div class="card-header">创建 / 导入 Agent</div>
+            <div class="card-body">
+              <input type="text" class="form-control mb-2" placeholder="Agent 名称">
+              <button class="btn btn-primary">创建</button>
+              <button class="btn btn-secondary">导入</button>
+            </div>
+          </div>
+        </div>
+        <div id="agent-config" class="hidden">
+          <div class="card">
+            <div class="card-header">配置 Agent</div>
+            <div class="card-body">
+              <label>性格/策略:</label>
+              <input type="text" class="form-control mb-2">
+              <label>初始持仓:</label>
+              <input type="text" class="form-control mb-2">
+              <button class="btn btn-success">保存配置</button>
+            </div>
+          </div>
+        </div>
+        <div id="agent-group" class="hidden">
+          <div class="card">
+            <div class="card-header">权限与分组</div>
+            <div class="card-body">
+              <select class="form-select mb-2">
+                <option>散户组</option>
+                <option>机构组</option>
+              </select>
+              <button class="btn btn-warning">更新分组</button>
+            </div>
+          </div>
+        </div>
+        <div id="agent-monitor" class="hidden">
+          <div class="card">
+            <div class="card-header">监控与调度</div>
+            <div class="card-body">
+              <p>当前运行状态: 正常</p>
+              <button class="btn btn-danger">停止</button>
+              <button class="btn btn-primary">重启</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    function showPage(page) {
+      document.getElementById('home').classList.add('hidden');
+      document.getElementById('market').classList.add('hidden');
+      document.getElementById('agent').classList.add('hidden');
+      document.getElementById(page).classList.remove('hidden');
+    }
+
+    function showAgentPanel(panel) {
+      ['home','create','config','group','monitor'].forEach(id => {
+        document.getElementById('agent-' + id).classList.add('hidden');
+      });
+      document.getElementById('agent-' + panel).classList.remove('hidden');
+    }
+
+    const ctx = document.getElementById('chart');
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: ['一月','二月','三月','四月','五月'],
+        datasets: [{
+          label: '指数走势',
+          data: [100,120,90,150,170],
+          borderColor: 'blue',
+          fill: false
+        }]
+      }
+    });
+  </script>
+</body>
+</html>

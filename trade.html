@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>股票交易界面</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background: #f5f6fa;
+        }
+        .header {
+            background: #2d3436;
+            color: #fff;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+        }
+        .back-btn {
+            background: #636e72;
+            color: #fff;
+            border: none;
+            padding: 8px 16px;
+            margin-right: 24px;
+            cursor: pointer;
+            border-radius: 4px;
+            text-decoration: none;
+        }
+        .container {
+            display: flex;
+            gap: 24px;
+            padding: 24px;
+        }
+        .panel {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            padding: 24px;
+            flex: 1;
+            min-width: 320px;
+        }
+        .panel-title {
+            font-size: 20px;
+            margin-bottom: 16px;
+            font-weight: bold;
+        }
+        .search-box {
+            margin-bottom: 16px;
+        }
+        .search-box input {
+            width: 100%;
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid #dfe6e9;
+        }
+        .stock-list, .holding-list {
+            margin-bottom: 24px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 8px;
+        }
+        th, td {
+            padding: 8px;
+            border-bottom: 1px solid #dfe6e9;
+            text-align: left;
+        }
+        th {
+            background: #f1f2f6;
+        }
+        .trade-actions button {
+            margin-right: 8px;
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .buy-btn {
+            background: #00b894;
+            color: #fff;
+        }
+        .sell-btn {
+            background: #d63031;
+            color: #fff;
+        }
+    </style>
+    <script>
+        // 示例数据
+        const stocks = [
+            { code: '600519', name: '贵州茅台', price: 1800.00 },
+            { code: '000001', name: '平安银行', price: 13.50 },
+            { code: '300750', name: '宁德时代', price: 210.00 },
+            { code: '601318', name: '中国平安', price: 45.00 }
+        ];
+        let holdings = [
+            { code: '600519', name: '贵州茅台', amount: 10, cost: 1750.00 },
+            { code: '000001', name: '平安银行', amount: 200, cost: 12.80 }
+        ];
+
+        function renderStockList(filter = '') {
+            const tbody = document.getElementById('stock-list-body');
+            tbody.innerHTML = '';
+            stocks.filter(s => s.name.includes(filter) || s.code.includes(filter)).forEach(stock => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${stock.code}</td>
+                    <td>${stock.name}</td>
+                    <td>￥${stock.price.toFixed(2)}</td>
+                    <td class="trade-actions">
+                        <button class="buy-btn" onclick="trade('buy','${stock.code}')">买入</button>
+                        <button class="sell-btn" onclick="trade('sell','${stock.code}')">卖出</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function renderHoldings() {
+            const tbody = document.getElementById('holding-list-body');
+            tbody.innerHTML = '';
+            holdings.forEach(h => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${h.code}</td>
+                    <td>${h.name}</td>
+                    <td>${h.amount}</td>
+                    <td>￥${h.cost.toFixed(2)}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function trade(type, code) {
+            alert(`${type === 'buy' ? '买入' : '卖出'} ${code}（演示功能）`);
+        }
+
+        window.onload = function() {
+            renderStockList();
+            renderHoldings();
+            document.getElementById('stock-search').addEventListener('input', function() {
+                renderStockList(this.value.trim());
+            });
+        }
+    </script>
+</head>
+<body>
+    <div class="header">
+        <a href="index.html" class="back-btn">返回</a>
+        <h2>股票交易</h2>
+    </div>
+    <div class="container">
+        <!-- 市场信息面板 -->
+        <div class="panel" style="max-width:400px;">
+            <div class="panel-title">市场信息</div>
+            <div>
+                <p>上证指数：<strong>3200.56</strong></p>
+                <p>深证成指：<strong>11000.23</strong></p>
+                <p>创业板指：<strong>2500.78</strong></p>
+                <p>涨跌家数：<strong>上涨 1200</strong> / <strong>下跌 800</strong></p>
+            </div>
+        </div>
+        <!-- 个股交易面板 -->
+        <div class="panel">
+            <div class="panel-title">个股交易</div>
+            <div class="search-box">
+                <input type="text" id="stock-search" placeholder="搜索股票代码或名称...">
+            </div>
+            <div class="stock-list">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>代码</th>
+                            <th>名称</th>
+                            <th>现价</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="stock-list-body">
+                        <!-- 动态填充 -->
+                    </tbody>
+                </table>
+            </div>
+            <div class="panel-title" style="font-size:16px;">持仓列表</div>
+            <div class="holding-list">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>代码</th>
+                            <th>名称</th>
+                            <th>持仓数量</th>
+                            <th>成本价</th>
+                        </tr>
+                    </thead>
+                    <tbody id="holding-list-body">
+                        <!-- 动态填充 -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

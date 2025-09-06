@@ -30,9 +30,9 @@
     <div class="container-fluid">
       <a class="navbar-brand" href="#">TwinMarket孪生股市</a>
       <div class="d-flex">
-        <select id="modeSelect" class="form-select me-2">
-          <option value="index.html">交易模式</option>
-          <option value="index.html">多代理模式</option>
+        <select id="modeSelect" class="form-select me-2" value="选择模式">
+          <option value="trade.html">交易模式</option>
+          <option value="agent.html">Agent管理</option>
           <option value="market-test.html">市场测试模式</option>
         </select>
         <a class="btn btn-outline-light" href="#">关于我们</a>
@@ -49,19 +49,24 @@
           <li class="list-group-item">AAPL 100股</li>
           <li class="list-group-item">TSLA 50股</li>
         </ul>
-        <button class="btn btn-success w-100 mb-2">交易</button>
-        <button class="btn btn-primary w-100 mb-2">用户管理</button>
-        <button class="btn btn-warning w-100">分析模式</button>
+        <h5>快速导航</h5>
+        <button class="btn btn-success w-100 mb-2" onclick="window.location.href='trade.html'">交易</button>
+        <button class="btn btn-info w-100 mb-2" onclick="window.location.href='trade.html'">论坛和新闻</button>
+        <button class="btn btn-primary w-100 mb-2" onclick="window.location.href='agent.html'">代理管理</button>
+        <button class="btn btn-warning w-100" onclick="window.location.href='market-test.html'">分析模式</button>
       </div>
 
       <!-- 主内容区 -->
       <div class="col-10 p-4">
-        <h4>指数涨跌折线图</h4>
-        <canvas id="indexChart" height="100"></canvas>
-
-        <div class="my-4">
-          <h5>最新新闻</h5>
-          <ul id="newsList" class="list-group"></ul>
+        <div class="row align-items-start">
+          <div class="col-md-7">
+            <h4>指数涨跌折线图</h4>
+            <canvas id="indexChart" height="100"></canvas>
+          </div>
+          <div class="col-md-5">
+            <h5>最新新闻</h5>
+            <ul id="newsList" class="list-group"></ul>
+          </div>
         </div>
 
         <div class="my-4">
