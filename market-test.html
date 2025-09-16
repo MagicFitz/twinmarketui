@@ -2,105 +2,502 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <title>市场测试模式</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>市场测试模式 - TwinMarket</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="icon" href="favicon.ico" type="image/x-icon">
+  <link rel="stylesheet" href="styles.css">
   <style>
-    body { overflow-x: hidden; }
-    #sidebar { height: 100vh; }
-    #canvasArea { border: 1px solid #ccc; height: 80vh; background: #f9f9f9; position: relative; }
-    .node {
+    .test-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 2rem;
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 2rem;
+    }
+    .event-sidebar {
+      background: white;
+      border-radius: 16px;
+      padding: 1.5rem;
+      box-shadow: var(--shadow-md);
+      height: calc(100vh - 120px);
+      overflow-y: auto;
+      position: sticky;
+      top: 20px;
+    }
+    .event-section {
+      margin-bottom: 2rem;
+    }
+    .event-section h5 {
+      color: var(--text-primary);
+      font-weight: 700;
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .checkbox-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    .checkbox-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.5rem;
+      border-radius: 8px;
+      transition: background 0.3s ease;
+      cursor: pointer;
+    }
+    .checkbox-item:hover {
+      background: var(--light-bg);
+    }
+    .checkbox-item input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
+      cursor: pointer;
+    }
+    .checkbox-item label {
+      cursor: pointer;
+      flex: 1;
+      color: var(--text-primary);
+    }
+    .canvas-container {
+      background: white;
+      border-radius: 16px;
+      box-shadow: var(--shadow-md);
+      padding: 1.5rem;
+      min-height: calc(100vh - 160px);
+      position: relative;
+    }
+    .canvas-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 2px solid var(--border-color);
+    }
+    .canvas-area {
+      background: linear-gradient(180deg, #f7f9fc 0%, #e8ecf4 100%);
+      border: 2px dashed #cbd5e0;
+      border-radius: 12px;
+      height: calc(100vh - 280px);
+      position: relative;
+      overflow: auto;
+      padding: 2rem;
+    }
+    .event-node {
       position: absolute;
-      padding: 10px 15px;
-      background: #fff;
-      border: 1px solid #333;
-      border-radius: 5px;
+      background: white;
+      border-radius: 12px;
+      padding: 1rem 1.5rem;
+      box-shadow: var(--shadow-lg);
+      border: 2px solid var(--primary-color);
       cursor: move;
+      transition: all 0.3s ease;
+      min-width: 180px;
+      z-index: 10;
+    }
+    .event-node:hover {
+      transform: scale(1.05);
+      box-shadow: 0 12px 32px rgba(0,0,0,0.15);
+      z-index: 100;
+    }
+    .event-node::before {
+      content: '';
+      position: absolute;
+      top: -8px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 16px;
+      height: 16px;
+      background: var(--gradient-primary);
+      border-radius: 50%;
+      box-shadow: 0 2px 8px rgba(91, 102, 246, 0.4);
+    }
+    .event-node-title {
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .event-node-type {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      background: var(--light-bg);
+      padding: 0.25rem 0.75rem;
+      border-radius: 12px;
+      display: inline-block;
+    }
+    .connection-line {
+      position: absolute;
+      background: linear-gradient(90deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+      height: 2px;
+      transform-origin: left center;
+      z-index: 1;
+    }
+    .time-input-group {
+      position: relative;
+    }
+    .time-input-group input {
+      padding-left: 2.5rem;
+    }
+    .time-input-group::before {
+      content: "📅";
+      position: absolute;
+      left: 0.75rem;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 1.25rem;
+    }
+    .action-buttons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+      margin-top: 2rem;
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .stat-card-mini {
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      padding: 0.75rem;
+      border-radius: 8px;
+      text-align: center;
+    }
+    .stat-card-mini .value {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--primary-color);
+    }
+    .stat-card-mini .label {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      margin-top: 0.25rem;
     }
   </style>
 </head>
 <body>
-  <!-- 顶部标题栏 -->
-  <nav class="navbar navbar-dark bg-dark">
-    <div class="container-fluid">
-      <a class="navbar-brand" href="index.html">← 返回主页面</a>
-      <span class="navbar-text text-white">市场测试模式</span>
+  <nav class="navbar-custom">
+    <div style="max-width: 1400px; margin: 0 auto; padding: 0 2rem; display: flex; justify-content: space-between; align-items: center;">
+      <a class="navbar-brand" href="index.html">← 返回主页</a>
+      <span style="color: white; font-weight: 600;">🧪 市场测试模式</span>
     </div>
   </nav>
 
-  <div class="container-fluid">
-    <div class="row">
-      <!-- 大侧边栏 -->
-      <div id="sidebar" class="col-3 bg-light p-3">
-        <h5>事件类型</h5>
-        <div class="form-check">
-          <input class="form-check-input" type="checkbox"> 地缘政治事件
+  <div class="test-container">
+    <aside class="event-sidebar">
+      <div class="stats-grid">
+        <div class="stat-card-mini">
+          <div class="value">0</div>
+          <div class="label">事件数</div>
         </div>
-        <div class="form-check">
-          <input class="form-check-input" type="checkbox"> 供应链风险事件
+        <div class="stat-card-mini">
+          <div class="value">0</div>
+          <div class="label">连接数</div>
         </div>
-        <div class="form-check">
-          <input class="form-check-input" type="checkbox"> 管理层变动事件
+        <div class="stat-card-mini">
+          <div class="value">0%</div>
+          <div class="label">完成度</div>
         </div>
-        <div class="form-check">
-          <input class="form-check-input" type="checkbox"> 娱乐新闻
-        </div>
+      </div>
 
-        <h5 class="mt-3">影响选项</h5>
-        <div class="form-check">
-          <input class="form-check-input" type="checkbox"> 直接影响具体公司
+      <div class="event-section">
+        <h5>📌 事件类型</h5>
+        <div class="checkbox-group">
+          <div class="checkbox-item">
+            <input type="checkbox" id="event1">
+            <label for="event1">🌍 地缘政治事件</label>
+          </div>
+          <div class="checkbox-item">
+            <input type="checkbox" id="event2">
+            <label for="event2">⛓️ 供应链风险事件</label>
+          </div>
+          <div class="checkbox-item">
+            <input type="checkbox" id="event3">
+            <label for="event3">👔 管理层变动事件</label>
+          </div>
+          <div class="checkbox-item">
+            <input type="checkbox" id="event4">
+            <label for="event4">💹 财报发布事件</label>
+          </div>
+          <div class="checkbox-item">
+            <input type="checkbox" id="event5">
+            <label for="event5">📺 媒体新闻事件</label>
+          </div>
         </div>
-        <div class="form-check">
-          <input class="form-check-input" type="checkbox"> 全局广播
-        </div>
+      </div>
 
-        <h5 class="mt-3">起始人群</h5>
-        <select class="form-select">
-          <option>散户</option>
-          <option>机构</option>
-          <option>海外投资者</option>
+      <div class="event-section">
+        <h5>🎯 影响范围</h5>
+        <div class="checkbox-group">
+          <div class="checkbox-item">
+            <input type="checkbox" id="impact1">
+            <label for="impact1">🎯 直接影响具体公司</label>
+          </div>
+          <div class="checkbox-item">
+            <input type="checkbox" id="impact2">
+            <label for="impact2">📢 全市场广播</label>
+          </div>
+          <div class="checkbox-item">
+            <input type="checkbox" id="impact3">
+            <label for="impact3">🏭 行业板块影响</label>
+          </div>
+          <div class="checkbox-item">
+            <input type="checkbox" id="impact4">
+            <label for="impact4">🔗 产业链传导</label>
+          </div>
+        </div>
+      </div>
+
+      <div class="event-section">
+        <h5>👥 起始人群</h5>
+        <select class="form-select-custom" style="width: 100%;">
+          <option>💰 散户群体</option>
+          <option>🏢 机构投资者</option>
+          <option>🌏 海外投资者</option>
+          <option>🤖 量化基金</option>
+          <option>🎲 游资热钱</option>
         </select>
-
-        <h5 class="mt-3">发布时间</h5>
-        <input type="datetime-local" class="form-control">
-
-        <button class="btn btn-primary mt-3 w-100" id="addNodeBtn">生成事件节点</button>
       </div>
 
-      <!-- 主画布 -->
-      <div class="col-9 p-3">
-        <h5>事件链条画布 (可拖拽)</h5>
-        <div id="canvasArea"></div>
+      <div class="event-section">
+        <h5>⏰ 发布时间</h5>
+        <div class="time-input-group">
+          <input type="datetime-local" class="form-control-custom" style="width: 100%;">
+        </div>
       </div>
-    </div>
+
+      <div class="action-buttons">
+        <button class="btn-custom btn-primary-custom" id="addNodeBtn">
+          ➕ 生成事件
+        </button>
+        <button class="btn-custom btn-success-custom" id="runSimulation">
+          ▶️ 运行模拟
+        </button>
+        <button class="btn-custom btn-danger-custom" id="clearCanvas">
+          🗑️ 清空画布
+        </button>
+        <button class="btn-custom btn-outline-custom" id="saveConfig">
+          💾 保存配置
+        </button>
+      </div>
+    </aside>
+
+    <main class="canvas-container">
+      <div class="canvas-header">
+        <div>
+          <h4 style="margin: 0; color: var(--text-primary);">📊 事件链条模拟画布</h4>
+          <p style="margin: 0.25rem 0 0; color: var(--text-secondary); font-size: 0.875rem;">
+            拖拽事件节点来创建关联，双击连接线删除
+          </p>
+        </div>
+        <div style="display: flex; gap: 0.5rem;">
+          <button class="btn-custom btn-outline-custom" style="font-size: 0.875rem; padding: 0.5rem 1rem;">
+            📥 导入场景
+          </button>
+          <button class="btn-custom btn-outline-custom" style="font-size: 0.875rem; padding: 0.5rem 1rem;">
+            📤 导出场景
+          </button>
+        </div>
+      </div>
+
+      <div id="canvasArea" class="canvas-area">
+        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; color: var(--text-secondary);">
+          <div style="font-size: 3rem; margin-bottom: 1rem;">🎨</div>
+          <div style="font-size: 1.25rem; font-weight: 600;">拖拽画布为空</div>
+          <div style="font-size: 0.875rem; margin-top: 0.5rem;">点击左侧"生成事件"按钮开始创建事件链</div>
+        </div>
+      </div>
+    </main>
   </div>
 
   <script>
     const canvasArea = document.getElementById("canvasArea");
     const addNodeBtn = document.getElementById("addNodeBtn");
+    const clearCanvas = document.getElementById("clearCanvas");
+    const runSimulation = document.getElementById("runSimulation");
+    const saveConfig = document.getElementById("saveConfig");
+
     let nodeCount = 0;
+    let connectionCount = 0;
+    const nodes = [];
+    const connections = [];
+    let selectedNode = null;
+
+    function updateStats() {
+      document.querySelector('.stat-card-mini:nth-child(1) .value').textContent = nodeCount;
+      document.querySelector('.stat-card-mini:nth-child(2) .value').textContent = connectionCount;
+      const completion = nodeCount > 0 ? Math.min(100, Math.round((connectionCount / nodeCount) * 100)) : 0;
+      document.querySelector('.stat-card-mini:nth-child(3) .value').textContent = completion + '%';
+    }
+
+    function createConnection(node1, node2) {
+      const rect1 = node1.getBoundingClientRect();
+      const rect2 = node2.getBoundingClientRect();
+      const canvasRect = canvasArea.getBoundingClientRect();
+
+      const x1 = rect1.left - canvasRect.left + rect1.width / 2;
+      const y1 = rect1.top - canvasRect.top + rect1.height / 2;
+      const x2 = rect2.left - canvasRect.left + rect2.width / 2;
+      const y2 = rect2.top - canvasRect.top + rect2.height / 2;
+
+      const distance = Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
+      const angle = Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI;
+
+      const line = document.createElement("div");
+      line.className = "connection-line";
+      line.style.left = x1 + "px";
+      line.style.top = y1 + "px";
+      line.style.width = distance + "px";
+      line.style.transform = `rotate(${angle}deg)`;
+
+      line.addEventListener("dblclick", () => {
+        line.remove();
+        connectionCount--;
+        updateStats();
+      });
+
+      canvasArea.appendChild(line);
+      connections.push({ node1, node2, line });
+      connectionCount++;
+      updateStats();
+    }
 
     addNodeBtn.addEventListener("click", () => {
+      if (canvasArea.querySelector('.canvas-area > div:first-child')) {
+        canvasArea.innerHTML = '';
+      }
+
+      const eventTypes = ["地缘政治", "供应链", "管理层", "财报", "新闻"];
+      const eventIcons = ["🌍", "⛓️", "👔", "💹", "📺"];
+      const randomType = Math.floor(Math.random() * eventTypes.length);
+
       const node = document.createElement("div");
-      node.className = "node";
-      node.textContent = "事件 " + (++nodeCount);
-      node.style.top = Math.random() * 300 + "px";
-      node.style.left = Math.random() * 500 + "px";
+      node.className = "event-node";
+      node.innerHTML = `
+        <div class="event-node-title">
+          <span>${eventIcons[randomType]}</span>
+          事件 ${++nodeCount}
+        </div>
+        <div class="event-node-type">${eventTypes[randomType]}</div>
+      `;
+
+      node.style.top = Math.random() * (canvasArea.offsetHeight - 100) + "px";
+      node.style.left = Math.random() * (canvasArea.offsetWidth - 200) + "px";
+
       canvasArea.appendChild(node);
+      nodes.push(node);
 
       let offsetX, offsetY, dragging = false;
+
       node.addEventListener("mousedown", (e) => {
-        dragging = true;
-        offsetX = e.offsetX;
-        offsetY = e.offsetY;
-      });
-      document.addEventListener("mousemove", (e) => {
-        if (dragging) {
-          node.style.left = (e.pageX - canvasArea.offsetLeft - offsetX) + "px";
-          node.style.top = (e.pageY - canvasArea.offsetTop - offsetY) + "px";
+        if (e.ctrlKey || e.metaKey) {
+          e.preventDefault();
+          if (selectedNode && selectedNode !== node) {
+            createConnection(selectedNode, node);
+            selectedNode.style.border = "2px solid var(--primary-color)";
+            selectedNode = null;
+          } else {
+            selectedNode = node;
+            node.style.border = "3px solid var(--success-color)";
+          }
+        } else {
+          dragging = true;
+          offsetX = e.offsetX;
+          offsetY = e.offsetY;
+          node.style.zIndex = 1000;
         }
       });
-      document.addEventListener("mouseup", () => dragging = false);
+
+      document.addEventListener("mousemove", (e) => {
+        if (dragging) {
+          const canvasRect = canvasArea.getBoundingClientRect();
+          const newX = e.clientX - canvasRect.left - offsetX;
+          const newY = e.clientY - canvasRect.top - offsetY;
+
+          node.style.left = Math.max(0, Math.min(newX, canvasArea.offsetWidth - node.offsetWidth)) + "px";
+          node.style.top = Math.max(0, Math.min(newY, canvasArea.offsetHeight - node.offsetHeight)) + "px";
+
+          connections.forEach(conn => {
+            if (conn.node1 === node || conn.node2 === node) {
+              const rect1 = conn.node1.getBoundingClientRect();
+              const rect2 = conn.node2.getBoundingClientRect();
+              const canvasRect = canvasArea.getBoundingClientRect();
+
+              const x1 = rect1.left - canvasRect.left + rect1.width / 2;
+              const y1 = rect1.top - canvasRect.top + rect1.height / 2;
+              const x2 = rect2.left - canvasRect.left + rect2.width / 2;
+              const y2 = rect2.top - canvasRect.top + rect2.height / 2;
+
+              const distance = Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
+              const angle = Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI;
+
+              conn.line.style.left = x1 + "px";
+              conn.line.style.top = y1 + "px";
+              conn.line.style.width = distance + "px";
+              conn.line.style.transform = `rotate(${angle}deg)`;
+            }
+          });
+        }
+      });
+
+      document.addEventListener("mouseup", () => {
+        dragging = false;
+        node.style.zIndex = 10;
+      });
+
+      updateStats();
     });
+
+    clearCanvas.addEventListener("click", () => {
+      if (confirm("确定要清空画布吗？所有事件和连接将被删除。")) {
+        canvasArea.innerHTML = `
+          <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; color: var(--text-secondary);">
+            <div style="font-size: 3rem; margin-bottom: 1rem;">🎨</div>
+            <div style="font-size: 1.25rem; font-weight: 600;">拖拽画布为空</div>
+            <div style="font-size: 0.875rem; margin-top: 0.5rem;">点击左侧"生成事件"按钮开始创建事件链</div>
+          </div>
+        `;
+        nodeCount = 0;
+        connectionCount = 0;
+        nodes.length = 0;
+        connections.length = 0;
+        selectedNode = null;
+        updateStats();
+      }
+    });
+
+    runSimulation.addEventListener("click", () => {
+      if (nodeCount === 0) {
+        alert("请先添加事件节点");
+        return;
+      }
+      alert("模拟功能演示 - 开始运行市场模拟");
+    });
+
+    saveConfig.addEventListener("click", () => {
+      alert("保存功能演示 - 配置已保存");
+    });
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && selectedNode) {
+        selectedNode.style.border = "2px solid var(--primary-color)";
+        selectedNode = null;
+      }
+    });
+
+    updateStats();
   </script>
 </body>
 </html>

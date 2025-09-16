@@ -2,141 +2,508 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <title>市场测试模式</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agent 管理 - TwinMarket</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="icon" href="favicon.ico" type="image/x-icon">
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    body { overflow-x: hidden; }
-    #sidebar { height: 100vh; }
-    #canvasArea { border: 1px solid #ccc; height: 80vh; background: #f9f9f9; position: relative; }
-    .node {
+    .agent-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    .agent-card-detail {
+      background: white;
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: var(--shadow-md);
+      transition: all 0.3s ease;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+    }
+    .agent-card-detail::before {
+      content: "";
       position: absolute;
-      padding: 10px 15px;
-      background: #fff;
-      border: 1px solid #333;
-      border-radius: 5px;
-      cursor: move;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: var(--gradient-primary);
+    }
+    .agent-card-detail:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-lg);
+    }
+    .agent-avatar {
+      width: 60px;
+      height: 60px;
+      background: var(--gradient-primary);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      margin-bottom: 1rem;
+    }
+    .panel-section {
+      display: none;
+    }
+    .panel-section.active {
+      display: block;
+      animation: fadeIn 0.3s ease;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .nav-pills {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 2rem;
+      padding: 0.5rem;
+      background: var(--light-bg);
+      border-radius: 12px;
+    }
+    .nav-pill {
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+    .nav-pill:hover {
+      background: rgba(91, 102, 246, 0.1);
+      color: var(--primary-color);
+    }
+    .nav-pill.active {
+      background: var(--gradient-primary);
+      color: white;
+    }
+    .stat-card {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 1.5rem;
+      border-radius: 12px;
+      margin-bottom: 1.5rem;
+    }
+    .stat-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 1rem;
+    }
+    .stat-item {
+      text-align: center;
+    }
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 0.25rem;
+    }
+    .stat-label {
+      font-size: 0.875rem;
+      opacity: 0.9;
     }
   </style>
 </head>
 <body>
-  <!-- 顶部标题栏 -->
-  <nav class="navbar navbar-dark bg-dark">
-    <div class="container-fluid">
-      <a class="navbar-brand" href="index.html">← 返回主页面</a>
-      <span class="navbar-text text-white">Agent管理模式</span>
+  <nav class="navbar-custom">
+    <div style="max-width: 1400px; margin: 0 auto; padding: 0 2rem; display: flex; justify-content: space-between; align-items: center;">
+      <a class="navbar-brand" href="index.html">← 返回主页</a>
+      <span style="color: white; font-weight: 600;">🤖 Agent 管理中心</span>
     </div>
   </nav>
 
-  <!-- Agent 管理界面 -->
-  <div id="agent" class="container mt-4 hidden">
-    <h2>🤖 Agent 管理界面</h2>
-    <div class="row">
-      <div class="col-md-3">
-        <div class="list-group">
-          <a href="#" class="list-group-item list-group-item-action" onclick="showAgentPanel('home')">Agent 管理首页</a>
-          <a href="#" class="list-group-item list-group-item-action" onclick="showAgentPanel('create')">Agent 创建/导入</a>
-          <a href="#" class="list-group-item list-group-item-action" onclick="showAgentPanel('config')">Agent 配置</a>
-          <a href="#" class="list-group-item list-group-item-action" onclick="showAgentPanel('group')">权限与分组管理</a>
-          <a href="#" class="list-group-item list-group-item-action" onclick="showAgentPanel('monitor')">监控与调度</a>
+  <div style="max-width: 1400px; margin: 0 auto; padding: 2rem;">
+    <div class="stat-card">
+      <div class="stat-row">
+        <div class="stat-item">
+          <div class="stat-value">12</div>
+          <div class="stat-label">总Agent数</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value">8</div>
+          <div class="stat-label">运行中</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value">95%</div>
+          <div class="stat-label">平均收益率</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value">￥2.4M</div>
+          <div class="stat-label">总管理资金</div>
         </div>
       </div>
-      <div class="col-md-9">
-        <div id="agent-home">
-          <div class="card">
-            <div class="card-header">所有 Agent</div>
-            <div class="card-body">
-              <div class="row">
-                <div class="col-md-6">
-                  <div class="card agent-card mb-2">
-                    <div class="card-body">散户 Agent 1</div>
+    </div>
+
+    <div class="nav-pills">
+      <button class="nav-pill active" onclick="showPanel('home')">🏠 Agent概览</button>
+      <button class="nav-pill" onclick="showPanel('create')">➕ 创建Agent</button>
+      <button class="nav-pill" onclick="showPanel('config')">⚙️ 配置管理</button>
+      <button class="nav-pill" onclick="showPanel('group')">👥 分组权限</button>
+      <button class="nav-pill" onclick="showPanel('monitor')">📊 监控调度</button>
+    </div>
+
+    <div id="panel-home" class="panel-section active">
+      <div class="card-custom">
+        <div class="card-header-custom">
+          所有 Agent
+          <button class="btn-custom btn-primary-custom" style="font-size: 0.875rem; padding: 0.5rem 1rem;">
+            刷新状态
+          </button>
+        </div>
+        <div class="agent-grid">
+          <div class="agent-card-detail">
+            <div class="agent-avatar">🤖</div>
+            <h5 class="agent-name">价值投资 Agent</h5>
+            <div class="agent-status active">● 运行中</div>
+            <div style="margin-top: 1rem; color: var(--text-secondary); font-size: 0.875rem;">
+              <div>策略类型: 长线价值</div>
+              <div>持仓: 5只股票</div>
+              <div>收益率: +12.3%</div>
+            </div>
+          </div>
+          <div class="agent-card-detail">
+            <div class="agent-avatar">🎯</div>
+            <h5 class="agent-name">量化交易 Agent</h5>
+            <div class="agent-status active">● 运行中</div>
+            <div style="margin-top: 1rem; color: var(--text-secondary); font-size: 0.875rem;">
+              <div>策略类型: 高频量化</div>
+              <div>持仓: 12只股票</div>
+              <div>收益率: +8.7%</div>
+            </div>
+          </div>
+          <div class="agent-card-detail">
+            <div class="agent-avatar">📈</div>
+            <h5 class="agent-name">趋势跟踪 Agent</h5>
+            <div class="agent-status inactive">● 已暂停</div>
+            <div style="margin-top: 1rem; color: var(--text-secondary); font-size: 0.875rem;">
+              <div>策略类型: 动量追踪</div>
+              <div>持仓: 3只股票</div>
+              <div>收益率: +5.2%</div>
+            </div>
+          </div>
+          <div class="agent-card-detail">
+            <div class="agent-avatar">🏛️</div>
+            <h5 class="agent-name">机构模拟 Agent</h5>
+            <div class="agent-status active">● 运行中</div>
+            <div style="margin-top: 1rem; color: var(--text-secondary); font-size: 0.875rem;">
+              <div>策略类型: 机构风格</div>
+              <div>持仓: 8只股票</div>
+              <div>收益率: +15.6%</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="panel-create" class="panel-section">
+      <div class="card-custom">
+        <div class="card-header-custom">创建新 Agent</div>
+        <div style="display: grid; gap: 1.5rem; max-width: 600px;">
+          <div>
+            <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Agent 名称</label>
+            <input type="text" class="form-control-custom" placeholder="例如：成长股投资Agent" style="width: 100%;">
+          </div>
+          <div>
+            <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">策略类型</label>
+            <select class="form-select-custom" style="width: 100%;">
+              <option>价值投资</option>
+              <option>成长投资</option>
+              <option>量化交易</option>
+              <option>动量追踪</option>
+              <option>套利策略</option>
+            </select>
+          </div>
+          <div>
+            <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">初始资金</label>
+            <input type="number" class="form-control-custom" placeholder="100000" style="width: 100%;">
+          </div>
+          <div>
+            <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">风险偏好</label>
+            <select class="form-select-custom" style="width: 100%;">
+              <option>保守型</option>
+              <option>稳健型</option>
+              <option>平衡型</option>
+              <option>积极型</option>
+              <option>激进型</option>
+            </select>
+          </div>
+          <div style="display: flex; gap: 1rem;">
+            <button class="btn-custom btn-primary-custom">🚀 创建Agent</button>
+            <button class="btn-custom btn-outline-custom">📥 导入配置</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="panel-config" class="panel-section">
+      <div class="card-custom">
+        <div class="card-header-custom">Agent 配置管理</div>
+        <div style="display: grid; gap: 1.5rem;">
+          <div>
+            <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">选择Agent</label>
+            <select class="form-select-custom" style="width: 100%; max-width: 400px;">
+              <option>价值投资 Agent</option>
+              <option>量化交易 Agent</option>
+              <option>趋势跟踪 Agent</option>
+              <option>机构模拟 Agent</option>
+            </select>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; max-width: 800px;">
+            <div>
+              <h6 style="margin-bottom: 1rem; color: var(--text-primary);">交易参数</h6>
+              <div style="display: grid; gap: 1rem;">
+                <div>
+                  <label style="font-size: 0.875rem; color: var(--text-secondary);">止损比例 (%)</label>
+                  <input type="number" class="form-control-custom" value="5" style="width: 100%;">
+                </div>
+                <div>
+                  <label style="font-size: 0.875rem; color: var(--text-secondary);">止盈比例 (%)</label>
+                  <input type="number" class="form-control-custom" value="15" style="width: 100%;">
+                </div>
+                <div>
+                  <label style="font-size: 0.875rem; color: var(--text-secondary);">单股最大仓位 (%)</label>
+                  <input type="number" class="form-control-custom" value="20" style="width: 100%;">
+                </div>
+              </div>
+            </div>
+            <div>
+              <h6 style="margin-bottom: 1rem; color: var(--text-primary);">选股条件</h6>
+              <div style="display: grid; gap: 1rem;">
+                <div>
+                  <label style="font-size: 0.875rem; color: var(--text-secondary);">市盈率范围</label>
+                  <div style="display: flex; gap: 0.5rem; align-items: center;">
+                    <input type="number" class="form-control-custom" value="10" style="width: 100%;">
+                    <span>-</span>
+                    <input type="number" class="form-control-custom" value="30" style="width: 100%;">
                   </div>
                 </div>
-                <div class="col-md-6">
-                  <div class="card agent-card mb-2">
-                    <div class="card-body">机构 Agent A</div>
-                  </div>
+                <div>
+                  <label style="font-size: 0.875rem; color: var(--text-secondary);">行业偏好</label>
+                  <select class="form-select-custom" style="width: 100%;">
+                    <option>不限</option>
+                    <option>科技</option>
+                    <option>消费</option>
+                    <option>金融</option>
+                    <option>医药</option>
+                  </select>
                 </div>
               </div>
             </div>
           </div>
+          <div>
+            <button class="btn-custom btn-success-custom">💾 保存配置</button>
+            <button class="btn-custom btn-outline-custom" style="margin-left: 1rem;">📤 导出配置</button>
+          </div>
         </div>
-        <div id="agent-create" class="hidden">
-          <div class="card">
-            <div class="card-header">创建 / 导入 Agent</div>
-            <div class="card-body">
-              <input type="text" class="form-control mb-2" placeholder="Agent 名称">
-              <button class="btn btn-primary">创建</button>
-              <button class="btn btn-secondary">导入</button>
+      </div>
+    </div>
+
+    <div id="panel-group" class="panel-section">
+      <div class="card-custom">
+        <div class="card-header-custom">分组与权限管理</div>
+        <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 2rem;">
+          <div>
+            <h6 style="margin-bottom: 1rem;">Agent 分组</h6>
+            <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+              <button class="btn-custom btn-outline-custom" style="text-align: left;">👥 散户组 (5)</button>
+              <button class="btn-custom btn-outline-custom" style="text-align: left;">🏢 机构组 (3)</button>
+              <button class="btn-custom btn-outline-custom" style="text-align: left;">🎯 量化组 (4)</button>
+              <button class="btn-custom btn-primary-custom" style="margin-top: 1rem;">➕ 新建分组</button>
+            </div>
+          </div>
+          <div>
+            <h6 style="margin-bottom: 1rem;">权限设置</h6>
+            <div class="table-custom" style="display: block;">
+              <table style="width: 100%;">
+                <thead>
+                  <tr>
+                    <th>权限项</th>
+                    <th>散户组</th>
+                    <th>机构组</th>
+                    <th>量化组</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>股票买入</td>
+                    <td>✅</td>
+                    <td>✅</td>
+                    <td>✅</td>
+                  </tr>
+                  <tr>
+                    <td>股票卖出</td>
+                    <td>✅</td>
+                    <td>✅</td>
+                    <td>✅</td>
+                  </tr>
+                  <tr>
+                    <td>融资融券</td>
+                    <td>❌</td>
+                    <td>✅</td>
+                    <td>✅</td>
+                  </tr>
+                  <tr>
+                    <td>期权交易</td>
+                    <td>❌</td>
+                    <td>✅</td>
+                    <td>✅</td>
+                  </tr>
+                  <tr>
+                    <td>算法交易</td>
+                    <td>❌</td>
+                    <td>❌</td>
+                    <td>✅</td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
-        <div id="agent-config" class="hidden">
-          <div class="card">
-            <div class="card-header">配置 Agent</div>
-            <div class="card-body">
-              <label>性格/策略:</label>
-              <input type="text" class="form-control mb-2">
-              <label>初始持仓:</label>
-              <input type="text" class="form-control mb-2">
-              <button class="btn btn-success">保存配置</button>
-            </div>
+      </div>
+    </div>
+
+    <div id="panel-monitor" class="panel-section">
+      <div class="card-custom">
+        <div class="card-header-custom">
+          监控与调度
+          <div style="display: flex; gap: 0.5rem;">
+            <button class="btn-custom btn-success-custom" style="font-size: 0.875rem; padding: 0.5rem 1rem;">▶️ 全部启动</button>
+            <button class="btn-custom btn-danger-custom" style="font-size: 0.875rem; padding: 0.5rem 1rem;">⏸️ 全部暂停</button>
           </div>
         </div>
-        <div id="agent-group" class="hidden">
-          <div class="card">
-            <div class="card-header">权限与分组</div>
-            <div class="card-body">
-              <select class="form-select mb-2">
-                <option>散户组</option>
-                <option>机构组</option>
-              </select>
-              <button class="btn btn-warning">更新分组</button>
-            </div>
-          </div>
+        <div style="margin-bottom: 2rem;">
+          <canvas id="performanceChart" height="80"></canvas>
         </div>
-        <div id="agent-monitor" class="hidden">
-          <div class="card">
-            <div class="card-header">监控与调度</div>
-            <div class="card-body">
-              <p>当前运行状态: 正常</p>
-              <button class="btn btn-danger">停止</button>
-              <button class="btn btn-primary">重启</button>
-            </div>
-          </div>
+        <div class="table-custom" style="display: block;">
+          <table style="width: 100%;">
+            <thead>
+              <tr>
+                <th>Agent名称</th>
+                <th>状态</th>
+                <th>CPU使用率</th>
+                <th>内存占用</th>
+                <th>最后活动</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>价值投资 Agent</td>
+                <td><span class="badge-custom badge-success">运行中</span></td>
+                <td>12%</td>
+                <td>256MB</td>
+                <td>2分钟前</td>
+                <td>
+                  <button class="btn-custom btn-danger-custom" style="padding: 0.25rem 0.75rem; font-size: 0.875rem;">暂停</button>
+                </td>
+              </tr>
+              <tr>
+                <td>量化交易 Agent</td>
+                <td><span class="badge-custom badge-success">运行中</span></td>
+                <td>45%</td>
+                <td>512MB</td>
+                <td>刚刚</td>
+                <td>
+                  <button class="btn-custom btn-danger-custom" style="padding: 0.25rem 0.75rem; font-size: 0.875rem;">暂停</button>
+                </td>
+              </tr>
+              <tr>
+                <td>趋势跟踪 Agent</td>
+                <td><span class="badge-custom badge-danger">已暂停</span></td>
+                <td>0%</td>
+                <td>0MB</td>
+                <td>1小时前</td>
+                <td>
+                  <button class="btn-custom btn-success-custom" style="padding: 0.25rem 0.75rem; font-size: 0.875rem;">启动</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
-    function showPage(page) {
-      document.getElementById('home').classList.add('hidden');
-      document.getElementById('market').classList.add('hidden');
-      document.getElementById('agent').classList.add('hidden');
-      document.getElementById(page).classList.remove('hidden');
-    }
-
-    function showAgentPanel(panel) {
-      ['home','create','config','group','monitor'].forEach(id => {
-        document.getElementById('agent-' + id).classList.add('hidden');
+    function showPanel(panelName) {
+      document.querySelectorAll('.panel-section').forEach(panel => {
+        panel.classList.remove('active');
       });
-      document.getElementById('agent-' + panel).classList.remove('hidden');
+      document.getElementById('panel-' + panelName).classList.add('active');
+
+      document.querySelectorAll('.nav-pill').forEach(pill => {
+        pill.classList.remove('active');
+      });
+      event.target.classList.add('active');
+
+      if (panelName === 'monitor' && !window.performanceChart) {
+        initPerformanceChart();
+      }
     }
 
-    const ctx = document.getElementById('chart');
-    new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels: ['一月','二月','三月','四月','五月'],
-        datasets: [{
-          label: '指数走势',
-          data: [100,120,90,150,170],
-          borderColor: 'blue',
-          fill: false
-        }]
-      }
-    });
+    function initPerformanceChart() {
+      const ctx = document.getElementById('performanceChart').getContext('2d');
+      const gradient = ctx.createLinearGradient(0, 0, 0, 200);
+      gradient.addColorStop(0, 'rgba(91, 102, 246, 0.4)');
+      gradient.addColorStop(1, 'rgba(91, 102, 246, 0)');
+
+      window.performanceChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00', '24:00'],
+          datasets: [
+            {
+              label: '价值投资Agent',
+              data: [5, 8, 12, 15, 10, 8, 6],
+              borderColor: '#5b66f6',
+              backgroundColor: 'transparent',
+              borderWidth: 2,
+              tension: 0.4
+            },
+            {
+              label: '量化交易Agent',
+              data: [20, 25, 30, 45, 40, 35, 25],
+              borderColor: '#00d68f',
+              backgroundColor: 'transparent',
+              borderWidth: 2,
+              tension: 0.4
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: true,
+              position: 'top'
+            },
+            tooltip: {
+              backgroundColor: 'rgba(26, 31, 54, 0.9)',
+              padding: 12,
+              cornerRadius: 8
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              title: {
+                display: true,
+                text: 'CPU 使用率 (%)'
+              }
+            }
+          }
+        }
+      });
+    }
   </script>
 </body>
 </html>

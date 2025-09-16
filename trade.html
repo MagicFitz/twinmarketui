@@ -2,202 +2,519 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>股票交易界面</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>股票交易 - TwinMarket</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="styles.css">
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            background: #f5f6fa;
+        .trade-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+            display: grid;
+            grid-template-columns: 350px 1fr 350px;
+            gap: 2rem;
         }
-        .header {
-            background: #2d3436;
-            color: #fff;
-            padding: 16px;
-            display: flex;
+        .market-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        .stat-box {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 1rem;
+            border-radius: 12px;
+            text-align: center;
+        }
+        .stat-label {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.25rem;
+        }
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+        .trade-panel {
+            background: white;
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow-md);
+        }
+        .stock-row {
+            display: grid;
+            grid-template-columns: 80px 1fr 100px 160px;
+            gap: 1rem;
             align-items: center;
-        }
-        .back-btn {
-            background: #636e72;
-            color: #fff;
-            border: none;
-            padding: 8px 16px;
-            margin-right: 24px;
-            cursor: pointer;
-            border-radius: 4px;
-            text-decoration: none;
-        }
-        .container {
-            display: flex;
-            gap: 24px;
-            padding: 24px;
-        }
-        .panel {
-            background: #fff;
+            padding: 1rem;
             border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-            padding: 24px;
-            flex: 1;
-            min-width: 320px;
+            margin-bottom: 0.75rem;
+            background: var(--light-bg);
+            transition: all 0.3s ease;
         }
-        .panel-title {
-            font-size: 20px;
-            margin-bottom: 16px;
-            font-weight: bold;
+        .stock-row:hover {
+            background: linear-gradient(135deg, rgba(91, 102, 246, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+            transform: translateX(5px);
         }
-        .search-box {
-            margin-bottom: 16px;
+        .stock-code {
+            font-weight: 700;
+            color: var(--primary-color);
         }
-        .search-box input {
+        .stock-name {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        .stock-price {
+            font-weight: 600;
+            text-align: right;
+        }
+        .trade-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+        .order-form {
+            background: var(--light-bg);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+        }
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        .form-group label {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+        .depth-table {
             width: 100%;
-            padding: 8px;
-            border-radius: 4px;
-            border: 1px solid #dfe6e9;
+            font-size: 0.875rem;
         }
-        .stock-list, .holding-list {
-            margin-bottom: 24px;
+        .depth-table th {
+            padding: 0.5rem;
+            background: var(--gradient-primary);
+            color: white;
+            font-weight: 600;
         }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 8px;
+        .depth-table td {
+            padding: 0.5rem;
+            text-align: center;
+            border-bottom: 1px solid var(--border-color);
         }
-        th, td {
-            padding: 8px;
-            border-bottom: 1px solid #dfe6e9;
-            text-align: left;
+        .depth-buy {
+            background: rgba(0, 214, 143, 0.05);
         }
-        th {
-            background: #f1f2f6;
+        .depth-sell {
+            background: rgba(255, 56, 56, 0.05);
         }
-        .trade-actions button {
-            margin-right: 8px;
-            padding: 6px 12px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
+        .portfolio-item {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 1rem;
+            padding: 1rem;
+            background: white;
+            border-radius: 8px;
+            margin-bottom: 0.75rem;
+            box-shadow: var(--shadow-sm);
+            transition: all 0.3s ease;
         }
-        .buy-btn {
-            background: #00b894;
-            color: #fff;
+        .portfolio-item:hover {
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
         }
-        .sell-btn {
-            background: #d63031;
-            color: #fff;
+        .portfolio-info {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+        .portfolio-profit {
+            font-size: 1.125rem;
+            font-weight: 700;
+        }
+        .profit-positive {
+            color: #ff3838;  /* 盈利用红色 */
+        }
+        .profit-negative {
+            color: #00d68f;  /* 亏损用绿色 */
         }
     </style>
+</head>
+<body>
+    <nav class="navbar-custom">
+        <div style="max-width: 1400px; margin: 0 auto; padding: 0 2rem; display: flex; justify-content: space-between; align-items: center;">
+            <a class="navbar-brand" href="index.html">← 返回主页</a>
+            <span style="color: white; font-weight: 600;">💰 股票交易中心</span>
+        </div>
+    </nav>
+
+    <div class="trade-container">
+        <!-- 左侧市场信息 -->
+        <aside>
+            <div class="card-custom">
+                <div class="card-header-custom">📊 市场概况</div>
+                <div class="market-stats">
+                    <div class="stat-box">
+                        <div class="stat-label">上证指数</div>
+                        <div class="stat-value ticker-up">3256.07</div>
+                        <div class="ticker-up">+1.2%</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">深证成指</div>
+                        <div class="stat-value ticker-up">10589.65</div>
+                        <div class="ticker-up">+0.8%</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">创业板指</div>
+                        <div class="stat-value ticker-up">2156.74</div>
+                        <div class="ticker-up">+1.5%</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">科创50</div>
+                        <div class="stat-value ticker-down">985.23</div>
+                        <div class="ticker-down">-0.3%</div>
+                    </div>
+                </div>
+                <div style="padding: 1rem; background: var(--light-bg); border-radius: 8px;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                        <span style="color: var(--text-secondary);">涨跌分布</span>
+                    </div>
+                    <div style="display: flex; gap: 1rem; justify-content: center;">
+                        <div style="text-align: center;">
+                            <div style="color: var(--success-color); font-size: 1.5rem; font-weight: 700;">2856</div>
+                            <div style="color: var(--text-secondary); font-size: 0.75rem;">上涨</div>
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="color: var(--text-secondary); font-size: 1.5rem; font-weight: 700;">342</div>
+                            <div style="color: var(--text-secondary); font-size: 0.75rem;">平盘</div>
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="color: var(--danger-color); font-size: 1.5rem; font-weight: 700;">1802</div>
+                            <div style="color: var(--text-secondary); font-size: 0.75rem;">下跌</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-custom" style="margin-top: 2rem;">
+                <div class="card-header-custom">💼 我的持仓</div>
+                <div class="portfolio-item">
+                    <div class="portfolio-info">
+                        <div style="font-weight: 700;">贵州茅台</div>
+                        <div style="font-size: 0.875rem; color: var(--text-secondary);">600519 · 10股</div>
+                        <div style="font-size: 0.875rem; color: var(--text-secondary);">成本: ￥1750.00</div>
+                    </div>
+                    <div style="text-align: right;">
+                        <div class="portfolio-profit profit-positive">+￥500</div>
+                        <div class="ticker-up">+2.86%</div>
+                    </div>
+                </div>
+                <div class="portfolio-item">
+                    <div class="portfolio-info">
+                        <div style="font-weight: 700;">平安银行</div>
+                        <div style="font-size: 0.875rem; color: var(--text-secondary);">000001 · 200股</div>
+                        <div style="font-size: 0.875rem; color: var(--text-secondary);">成本: ￥12.80</div>
+                    </div>
+                    <div style="text-align: right;">
+                        <div class="portfolio-profit profit-positive">+￥140</div>
+                        <div class="ticker-up">+5.47%</div>
+                    </div>
+                </div>
+                <div style="margin-top: 1rem; padding: 1rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 8px; color: white;">
+                    <div style="display: flex; justify-content: space-between;">
+                        <span>总资产</span>
+                        <span style="font-weight: 700;">￥20,340</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-top: 0.5rem;">
+                        <span>今日盈亏</span>
+                        <span style="font-weight: 700;">+￥640</span>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- 中间交易面板 -->
+        <main>
+            <div class="trade-panel">
+                <div class="card-header-custom">
+                    🔍 股票搜索与交易
+                    <div style="display: flex; gap: 0.5rem;">
+                        <button class="btn-custom btn-outline-custom" style="font-size: 0.875rem; padding: 0.5rem 1rem;">自选股</button>
+                        <button class="btn-custom btn-outline-custom" style="font-size: 0.875rem; padding: 0.5rem 1rem;">热门股</button>
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 1.5rem;">
+                    <input type="text" id="stock-search" class="form-control-custom" placeholder="搜索股票代码或名称..." style="width: 100%;">
+                </div>
+
+                <div id="stock-list">
+                    <div class="stock-row">
+                        <span class="stock-code">600519</span>
+                        <span class="stock-name">贵州茅台</span>
+                        <span class="stock-price ticker-up">￥1800.00</span>
+                        <div class="trade-buttons">
+                            <button class="btn-custom btn-success-custom" style="padding: 0.5rem 1rem; font-size: 0.875rem;" onclick="showOrderForm('buy', '600519', '贵州茅台', 1800)">买入</button>
+                            <button class="btn-custom btn-danger-custom" style="padding: 0.5rem 1rem; font-size: 0.875rem;" onclick="showOrderForm('sell', '600519', '贵州茅台', 1800)">卖出</button>
+                        </div>
+                    </div>
+                    <div class="stock-row">
+                        <span class="stock-code">000001</span>
+                        <span class="stock-name">平安银行</span>
+                        <span class="stock-price ticker-up">￥13.50</span>
+                        <div class="trade-buttons">
+                            <button class="btn-custom btn-success-custom" style="padding: 0.5rem 1rem; font-size: 0.875rem;" onclick="showOrderForm('buy', '000001', '平安银行', 13.50)">买入</button>
+                            <button class="btn-custom btn-danger-custom" style="padding: 0.5rem 1rem; font-size: 0.875rem;" onclick="showOrderForm('sell', '000001', '平安银行', 13.50)">卖出</button>
+                        </div>
+                    </div>
+                    <div class="stock-row">
+                        <span class="stock-code">300750</span>
+                        <span class="stock-name">宁德时代</span>
+                        <span class="stock-price ticker-down">￥210.00</span>
+                        <div class="trade-buttons">
+                            <button class="btn-custom btn-success-custom" style="padding: 0.5rem 1rem; font-size: 0.875rem;" onclick="showOrderForm('buy', '300750', '宁德时代', 210)">买入</button>
+                            <button class="btn-custom btn-danger-custom" style="padding: 0.5rem 1rem; font-size: 0.875rem;" onclick="showOrderForm('sell', '300750', '宁德时代', 210)">卖出</button>
+                        </div>
+                    </div>
+                    <div class="stock-row">
+                        <span class="stock-code">601318</span>
+                        <span class="stock-name">中国平安</span>
+                        <span class="stock-price ticker-up">￥45.00</span>
+                        <div class="trade-buttons">
+                            <button class="btn-custom btn-success-custom" style="padding: 0.5rem 1rem; font-size: 0.875rem;" onclick="showOrderForm('buy', '601318', '中国平安', 45)">买入</button>
+                            <button class="btn-custom btn-danger-custom" style="padding: 0.5rem 1rem; font-size: 0.875rem;" onclick="showOrderForm('sell', '601318', '中国平安', 45)">卖出</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="order-form" class="order-form" style="display: none;">
+                    <h5 id="order-title" style="margin-bottom: 1rem; color: var(--text-primary);">下单</h5>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>股票代码</label>
+                            <input type="text" id="order-code" class="form-control-custom" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label>股票名称</label>
+                            <input type="text" id="order-name" class="form-control-custom" readonly>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>委托价格</label>
+                            <input type="number" id="order-price" class="form-control-custom" step="0.01">
+                        </div>
+                        <div class="form-group">
+                            <label>委托数量</label>
+                            <input type="number" id="order-quantity" class="form-control-custom" step="100" value="100">
+                        </div>
+                    </div>
+                    <div style="padding: 1rem; background: white; border-radius: 8px; margin-bottom: 1rem;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                            <span>预计金额</span>
+                            <span id="order-amount" style="font-weight: 700;">￥0.00</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                            <span>手续费(约)</span>
+                            <span id="order-fee">￥0.00</span>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 1rem;">
+                        <button id="order-confirm" class="btn-custom" style="flex: 1;">确认下单</button>
+                        <button class="btn-custom btn-outline-custom" style="flex: 1;" onclick="hideOrderForm()">取消</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- 右侧五档行情 -->
+        <aside>
+            <div class="card-custom">
+                <div class="card-header-custom">📈 五档行情</div>
+                <div style="padding: 0.5rem 0;">
+                    <select class="form-select-custom" style="width: 100%;">
+                        <option>600519 贵州茅台</option>
+                        <option>000001 平安银行</option>
+                        <option>300750 宁德时代</option>
+                    </select>
+                </div>
+                <table class="depth-table">
+                    <thead>
+                        <tr>
+                            <th>档位</th>
+                            <th>价格</th>
+                            <th>数量</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="depth-sell">
+                            <td>卖五</td>
+                            <td>1805.00</td>
+                            <td>520</td>
+                        </tr>
+                        <tr class="depth-sell">
+                            <td>卖四</td>
+                            <td>1804.00</td>
+                            <td>380</td>
+                        </tr>
+                        <tr class="depth-sell">
+                            <td>卖三</td>
+                            <td>1803.00</td>
+                            <td>260</td>
+                        </tr>
+                        <tr class="depth-sell">
+                            <td>卖二</td>
+                            <td>1802.00</td>
+                            <td>150</td>
+                        </tr>
+                        <tr class="depth-sell">
+                            <td>卖一</td>
+                            <td>1801.00</td>
+                            <td>100</td>
+                        </tr>
+                        <tr style="background: var(--light-bg);">
+                            <td colspan="3" style="font-weight: 700; color: var(--primary-color);">当前价: 1800.00</td>
+                        </tr>
+                        <tr class="depth-buy">
+                            <td>买一</td>
+                            <td>1799.00</td>
+                            <td>80</td>
+                        </tr>
+                        <tr class="depth-buy">
+                            <td>买二</td>
+                            <td>1798.00</td>
+                            <td>120</td>
+                        </tr>
+                        <tr class="depth-buy">
+                            <td>买三</td>
+                            <td>1797.00</td>
+                            <td>200</td>
+                        </tr>
+                        <tr class="depth-buy">
+                            <td>买四</td>
+                            <td>1796.00</td>
+                            <td>350</td>
+                        </tr>
+                        <tr class="depth-buy">
+                            <td>买五</td>
+                            <td>1795.00</td>
+                            <td>480</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="card-custom" style="margin-top: 2rem;">
+                <div class="card-header-custom">📋 委托记录</div>
+                <div style="padding: 1rem; background: var(--light-bg); border-radius: 8px; margin-bottom: 0.75rem;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                        <span style="font-weight: 600;">买入 600519</span>
+                        <span class="badge-custom badge-success">已成交</span>
+                    </div>
+                    <div style="font-size: 0.875rem; color: var(--text-secondary);">
+                        <div>价格: ￥1798.00 | 数量: 10股</div>
+                        <div>时间: 09:35:21</div>
+                    </div>
+                </div>
+                <div style="padding: 1rem; background: var(--light-bg); border-radius: 8px; margin-bottom: 0.75rem;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                        <span style="font-weight: 600;">卖出 000001</span>
+                        <span class="badge-custom badge-danger">已撤单</span>
+                    </div>
+                    <div style="font-size: 0.875rem; color: var(--text-secondary);">
+                        <div>价格: ￥13.80 | 数量: 100股</div>
+                        <div>时间: 10:12:45</div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+    </div>
+
     <script>
-        // 示例数据
         const stocks = [
-            { code: '600519', name: '贵州茅台', price: 1800.00 },
-            { code: '000001', name: '平安银行', price: 13.50 },
-            { code: '300750', name: '宁德时代', price: 210.00 },
-            { code: '601318', name: '中国平安', price: 45.00 }
-        ];
-        let holdings = [
-            { code: '600519', name: '贵州茅台', amount: 10, cost: 1750.00 },
-            { code: '000001', name: '平安银行', amount: 200, cost: 12.80 }
+            { code: '600519', name: '贵州茅台', price: 1800.00, change: 1.2 },
+            { code: '000001', name: '平安银行', price: 13.50, change: 2.3 },
+            { code: '300750', name: '宁德时代', price: 210.00, change: -1.5 },
+            { code: '601318', name: '中国平安', price: 45.00, change: 0.8 },
+            { code: '002594', name: '比亚迪', price: 265.00, change: 3.2 },
+            { code: '000002', name: '万科A', price: 15.20, change: -0.5 }
         ];
 
         function renderStockList(filter = '') {
-            const tbody = document.getElementById('stock-list-body');
-            tbody.innerHTML = '';
+            const stockList = document.getElementById('stock-list');
+            stockList.innerHTML = '';
+
             stocks.filter(s => s.name.includes(filter) || s.code.includes(filter)).forEach(stock => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>${stock.code}</td>
-                    <td>${stock.name}</td>
-                    <td>￥${stock.price.toFixed(2)}</td>
-                    <td class="trade-actions">
-                        <button class="buy-btn" onclick="trade('buy','${stock.code}')">买入</button>
-                        <button class="sell-btn" onclick="trade('sell','${stock.code}')">卖出</button>
-                    </td>
+                const row = document.createElement('div');
+                row.className = 'stock-row';
+                row.innerHTML = `
+                    <span class="stock-code">${stock.code}</span>
+                    <span class="stock-name">${stock.name}</span>
+                    <span class="stock-price ${stock.change > 0 ? 'ticker-up' : 'ticker-down'}">￥${stock.price.toFixed(2)}</span>
+                    <div class="trade-buttons">
+                        <button class="btn-custom btn-success-custom" style="padding: 0.5rem 1rem; font-size: 0.875rem;" onclick="showOrderForm('buy', '${stock.code}', '${stock.name}', ${stock.price})">买入</button>
+                        <button class="btn-custom btn-danger-custom" style="padding: 0.5rem 1rem; font-size: 0.875rem;" onclick="showOrderForm('sell', '${stock.code}', '${stock.name}', ${stock.price})">卖出</button>
+                    </div>
                 `;
-                tbody.appendChild(tr);
+                stockList.appendChild(row);
             });
         }
 
-        function renderHoldings() {
-            const tbody = document.getElementById('holding-list-body');
-            tbody.innerHTML = '';
-            holdings.forEach(h => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>${h.code}</td>
-                    <td>${h.name}</td>
-                    <td>${h.amount}</td>
-                    <td>￥${h.cost.toFixed(2)}</td>
-                `;
-                tbody.appendChild(tr);
-            });
+        function showOrderForm(type, code, name, price) {
+            const form = document.getElementById('order-form');
+            const title = document.getElementById('order-title');
+            const confirmBtn = document.getElementById('order-confirm');
+
+            title.textContent = type === 'buy' ? '买入下单' : '卖出下单';
+            confirmBtn.className = type === 'buy' ? 'btn-custom btn-success-custom' : 'btn-custom btn-danger-custom';
+            confirmBtn.textContent = type === 'buy' ? '确认买入' : '确认卖出';
+
+            document.getElementById('order-code').value = code;
+            document.getElementById('order-name').value = name;
+            document.getElementById('order-price').value = price.toFixed(2);
+            document.getElementById('order-quantity').value = 100;
+
+            updateOrderAmount();
+            form.style.display = 'block';
         }
 
-        function trade(type, code) {
-            alert(`${type === 'buy' ? '买入' : '卖出'} ${code}（演示功能）`);
+        function hideOrderForm() {
+            document.getElementById('order-form').style.display = 'none';
         }
 
-        window.onload = function() {
-            renderStockList();
-            renderHoldings();
-            document.getElementById('stock-search').addEventListener('input', function() {
-                renderStockList(this.value.trim());
-            });
+        function updateOrderAmount() {
+            const price = parseFloat(document.getElementById('order-price').value) || 0;
+            const quantity = parseInt(document.getElementById('order-quantity').value) || 0;
+            const amount = price * quantity;
+            const fee = Math.max(amount * 0.0003, 5);
+
+            document.getElementById('order-amount').textContent = '￥' + amount.toFixed(2);
+            document.getElementById('order-fee').textContent = '￥' + fee.toFixed(2);
         }
+
+        document.getElementById('stock-search').addEventListener('input', function() {
+            renderStockList(this.value.trim());
+        });
+
+        document.getElementById('order-price').addEventListener('input', updateOrderAmount);
+        document.getElementById('order-quantity').addEventListener('input', updateOrderAmount);
+
+        document.getElementById('order-confirm').addEventListener('click', function() {
+            alert('交易功能演示 - 订单已提交');
+            hideOrderForm();
+        });
+
+        renderStockList();
     </script>
-</head>
-<body>
-    <div class="header">
-        <a href="index.html" class="back-btn">返回</a>
-        <h2>股票交易</h2>
-    </div>
-    <div class="container">
-        <!-- 市场信息面板 -->
-        <div class="panel" style="max-width:400px;">
-            <div class="panel-title">市场信息</div>
-            <div>
-                <p>上证指数：<strong>3200.56</strong></p>
-                <p>深证成指：<strong>11000.23</strong></p>
-                <p>创业板指：<strong>2500.78</strong></p>
-                <p>涨跌家数：<strong>上涨 1200</strong> / <strong>下跌 800</strong></p>
-            </div>
-        </div>
-        <!-- 个股交易面板 -->
-        <div class="panel">
-            <div class="panel-title">个股交易</div>
-            <div class="search-box">
-                <input type="text" id="stock-search" placeholder="搜索股票代码或名称...">
-            </div>
-            <div class="stock-list">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>代码</th>
-                            <th>名称</th>
-                            <th>现价</th>
-                            <th>操作</th>
-                        </tr>
-                    </thead>
-                    <tbody id="stock-list-body">
-                        <!-- 动态填充 -->
-                    </tbody>
-                </table>
-            </div>
-            <div class="panel-title" style="font-size:16px;">持仓列表</div>
-            <div class="holding-list">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>代码</th>
-                            <th>名称</th>
-                            <th>持仓数量</th>
-                            <th>成本价</th>
-                        </tr>
-                    </thead>
-                    <tbody id="holding-list-body">
-                        <!-- 动态填充 -->
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
 </body>
 </html>

@@ -2,141 +2,313 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <title>TwinMarket孪生股市</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TwinMarket 孪生股市</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="icon" href="favicon.ico" type="image/x-icon">
+  <link rel="stylesheet" href="styles.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <style>
-    body { overflow-x: hidden; }
-    #sidebar { height: 100vh; }
-    #ticker, #stock-ticker {
-      white-space: nowrap;
-      overflow: hidden;
-    }
-    #ticker span, #stock-ticker span {
-      display: inline-block;
-      padding-right: 50px;
-      animation: ticker 20s linear infinite;
-    }
-    @keyframes ticker {
-      0% { transform: translateX(100%); }
-      100% { transform: translateX(-100%); }
-    }
-    #forum { height: 200px; overflow-y: auto; border: 1px solid #ddd; padding: 10px; }
-  </style>
 </head>
-<body>
-  <!-- 顶部标题栏 -->
-  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-    <div class="container-fluid">
-      <a class="navbar-brand" href="#">TwinMarket孪生股市</a>
-      <div class="d-flex">
-        <select id="modeSelect" class="form-select me-2" value="选择模式">
-          <option value="trade.html">交易模式</option>
-          <option value="agent.html">Agent管理</option>
-          <option value="market-test.html">市场测试模式</option>
+<body class="index-page">
+  <nav class="navbar-custom">
+    <div style="max-width: 1400px; margin: 0 auto; padding: 0 2rem; width: 100%; display: flex; justify-content: space-between; align-items: center;">
+      <div style="display: flex; align-items: center; gap: 2rem;">
+        <a class="navbar-brand" href="#">TwinMarket 孪生股市</a>
+        <select class="form-select-custom" id="modeSelect" style="min-width: 150px;">
+          <option value="">选择模式</option>
+          <option value="trade.html">📊 交易模式</option>
+          <option value="agent.html">🤖 Agent管理</option>
+          <option value="market-test.html">🧪 市场测试</option>
         </select>
-        <a class="btn btn-outline-light" href="#">关于我们</a>
       </div>
+      <button class="btn-custom btn-outline-custom">关于我们</button>
     </div>
   </nav>
 
-  <div class="container-fluid">
-    <div class="row">
-      <!-- 侧边栏 -->
-      <div id="sidebar" class="col-2 bg-light p-3">
-        <h5>我的持仓</h5>
-        <ul class="list-group mb-3">
-          <li class="list-group-item">AAPL 100股</li>
-          <li class="list-group-item">TSLA 50股</li>
-        </ul>
-        <h5>快速导航</h5>
-        <button class="btn btn-success w-100 mb-2" onclick="window.location.href='trade.html'">交易</button>
-        <button class="btn btn-info w-100 mb-2" onclick="window.location.href='trade.html'">论坛和新闻</button>
-        <button class="btn btn-primary w-100 mb-2" onclick="window.location.href='agent.html'">代理管理</button>
-        <button class="btn btn-warning w-100" onclick="window.location.href='market-test.html'">分析模式</button>
-      </div>
+  <div class="main-wrapper">
+    <div class="content-container">
 
-      <!-- 主内容区 -->
-      <div class="col-10 p-4">
-        <div class="row align-items-start">
-          <div class="col-md-7">
-            <h4>指数涨跌折线图</h4>
-            <canvas id="indexChart" height="100"></canvas>
+      <aside class="sidebar-custom">
+        <h5>💼 我的持仓</h5>
+        <div style="margin-bottom: 2rem;">
+          <div class="holding-card">
+            <div class="stock-symbol">AAPL</div>
+            <div class="stock-name">苹果公司</div>
+            <div class="stock-quantity">100股 | <span class="ticker-up">+2.3%</span></div>
           </div>
-          <div class="col-md-5">
-            <h5>最新新闻</h5>
-            <ul id="newsList" class="list-group"></ul>
+          <div class="holding-card">
+            <div class="stock-symbol">TSLA</div>
+            <div class="stock-name">特斯拉</div>
+            <div class="stock-quantity">50股 | <span class="ticker-down">-1.5%</span></div>
           </div>
         </div>
 
-        <div class="my-4">
-          <h5>指数滚动条</h5>
-          <div id="ticker"><span>上证指数 +1.2% 深证成指 +0.8% 创业板 +1.5%</span></div>
+        <h5>🚀 快速导航</h5>
+        <nav style="display: flex; flex-direction: column; gap: 0.5rem;">
+          <button class="btn-custom btn-success-custom" onclick="window.location.href='trade.html'">
+            💰 开始交易
+          </button>
+          <button class="btn-custom btn-primary-custom" onclick="window.location.href='agent.html'">
+            🤖 代理管理
+          </button>
+          <button class="btn-custom btn-outline-custom" onclick="window.location.href='market-test.html'">
+            📈 分析模式
+          </button>
+        </nav>
+      </aside>
+
+      <main class="main-content">
+        <div class="stock-ticker">
+          <div class="ticker-content">
+            <span class="ticker-item ticker-up">📈 上证指数 3256.07 +1.2%</span>
+            <span class="ticker-item ticker-up">📈 深证成指 10589.65 +0.8%</span>
+            <span class="ticker-item ticker-up">📈 创业板指 2156.74 +1.5%</span>
+            <span class="ticker-item ticker-down">📉 恒生指数 17865.34 -0.5%</span>
+            <span class="ticker-item ticker-up">📈 纳斯达克 13576.89 +2.1%</span>
+            <span class="ticker-item ticker-up">📈 标普500 4512.34 +1.3%</span>
+            <!-- 重复内容实现无缝滚动 -->
+            <span class="ticker-item ticker-up">📈 上证指数 3256.07 +1.2%</span>
+            <span class="ticker-item ticker-up">📈 深证成指 10589.65 +0.8%</span>
+            <span class="ticker-item ticker-up">📈 创业板指 2156.74 +1.5%</span>
+            <span class="ticker-item ticker-down">📉 恒生指数 17865.34 -0.5%</span>
+            <span class="ticker-item ticker-up">📈 纳斯达克 13576.89 +2.1%</span>
+            <span class="ticker-item ticker-up">📈 标普500 4512.34 +1.3%</span>
+          </div>
         </div>
 
-        <div class="my-4">
-          <h5>个股异动滚动条</h5>
-          <div id="stock-ticker"><span>AAPL +3.2% TSLA -2.1% BABA +4.5%</span></div>
+        <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 2rem; margin-bottom: 2rem;">
+          <div class="chart-container">
+            <div class="card-header-custom">
+              📊 市场走势
+              <select class="form-select-custom" style="width: 120px; font-size: 0.875rem;">
+                <option>上证指数</option>
+                <option>深证成指</option>
+                <option>创业板指</option>
+              </select>
+            </div>
+            <canvas id="indexChart"></canvas>
+          </div>
+
+          <div class="card-custom">
+            <div class="card-header-custom">
+              📰 最新资讯
+            </div>
+            <div id="newsList"></div>
+          </div>
         </div>
 
-        <div class="my-4">
-          <h5>股吧论坛</h5>
-          <div id="forum"></div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
+          <div class="card-custom">
+            <div class="card-header-custom">
+              🔥 热门个股
+            </div>
+            <div id="hotStocks"></div>
+          </div>
+
+          <div class="forum-container">
+            <div class="card-header-custom" style="margin-bottom: 1rem;">
+              💬 实时讨论
+            </div>
+            <div id="forum"></div>
+          </div>
         </div>
-      </div>
+
+        <div class="stock-ticker">
+          <div class="ticker-content">
+            <span class="ticker-item ticker-up">🚀 比亚迪 +4.2%</span>
+            <span class="ticker-item ticker-down">📉 贵州茅台 -2.1%</span>
+            <span class="ticker-item ticker-up">🚀 宁德时代 +3.5%</span>
+            <span class="ticker-item ticker-up">🚀 中国平安 +1.8%</span>
+            <span class="ticker-item ticker-down">📉 腾讯控股 -1.3%</span>
+            <span class="ticker-item ticker-up">🚀 阿里巴巴 +2.7%</span>
+            <!-- 重复内容实现无缝滚动 -->
+            <span class="ticker-item ticker-up">🚀 比亚迪 +4.2%</span>
+            <span class="ticker-item ticker-down">📉 贵州茅台 -2.1%</span>
+            <span class="ticker-item ticker-up">🚀 宁德时代 +3.5%</span>
+            <span class="ticker-item ticker-up">🚀 中国平安 +1.8%</span>
+            <span class="ticker-item ticker-down">📉 腾讯控股 -1.3%</span>
+            <span class="ticker-item ticker-up">🚀 阿里巴巴 +2.7%</span>
+          </div>
+        </div>
+      </main>
     </div>
   </div>
 
   <script>
-    // 模式选择跳转
     document.getElementById("modeSelect").addEventListener("change", function() {
-      window.location.href = this.value;
+      if (this.value) window.location.href = this.value;
     });
 
-    // 折线图
     const ctx = document.getElementById('indexChart').getContext('2d');
+    const gradient = ctx.createLinearGradient(0, 0, 0, 300);
+    gradient.addColorStop(0, 'rgba(91, 102, 246, 0.4)');
+    gradient.addColorStop(1, 'rgba(91, 102, 246, 0)');
+
+    const labels = [];
+    const data = [];
+    const now = new Date();
+    let currentValue = 3200;
+
+    // 生成连续的历史数据
+    for (let i = 30; i >= 0; i--) {
+      const time = new Date(now - i * 60000);
+      labels.push(time.getHours().toString().padStart(2, '0') + ':' + time.getMinutes().toString().padStart(2, '0'));
+
+      // 每个点基于前一个点进行小幅波动
+      const change = (Math.random() - 0.5) * 10;
+      currentValue = Math.max(3150, Math.min(3250, currentValue + change));
+      data.push(currentValue);
+    }
+
     const indexChart = new Chart(ctx, {
       type: 'line',
       data: {
-        labels: Array.from({length: 20}, (_, i) => i),
+        labels: labels,
         datasets: [{
-          label: '指数走势',
-          data: Array.from({length: 20}, () => Math.random() * 100),
-          borderColor: 'blue',
-          fill: false
+          label: '指数',
+          data: data,
+          borderColor: '#5b66f6',
+          backgroundColor: gradient,
+          borderWidth: 2,
+          fill: true,
+          tension: 0.4,
+          pointRadius: 0,
+          pointHoverRadius: 5
         }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        aspectRatio: 2.5,
+        interaction: {
+          intersect: false,
+          mode: 'index'
+        },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: 'rgba(26, 31, 54, 0.9)',
+            titleColor: '#fff',
+            bodyColor: '#fff',
+            padding: 12,
+            cornerRadius: 8,
+            displayColors: false
+          }
+        },
+        scales: {
+          x: {
+            grid: { display: false },
+            ticks: {
+              maxTicksLimit: 8,
+              font: { size: 11 }
+            }
+          },
+          y: {
+            min: 3100,
+            max: 3300,
+            grid: {
+              color: 'rgba(0, 0, 0, 0.05)'
+            },
+            ticks: {
+              font: { size: 11 }
+            }
+          }
+        },
+        animation: {
+          duration: 0
+        }
       }
     });
+
+    // 保存最后一个值用于连续性
+    let lastValue = data[data.length - 1];
+
     setInterval(() => {
-      indexChart.data.labels.push(indexChart.data.labels.length);
+      const time = new Date();
+      indexChart.data.labels.push(time.getHours().toString().padStart(2, '0') + ':' + time.getMinutes().toString().padStart(2, '0'));
       indexChart.data.labels.shift();
-      indexChart.data.datasets[0].data.push(Math.random() * 100);
+
+      // 基于上一个值进行小幅波动，模拟真实股市
+      const change = (Math.random() - 0.5) * 20; // -10到+10的波动
+      lastValue = Math.max(3100, Math.min(3300, lastValue + change)); // 限制在3100-3300范围内
+
+      indexChart.data.datasets[0].data.push(lastValue);
       indexChart.data.datasets[0].data.shift();
-      indexChart.update();
+      indexChart.update('none');
     }, 2000);
 
-    // 新闻列表动态更新
     const newsList = document.getElementById("newsList");
-    const newsPool = ["美联储加息预期升温", "新能源车销量再创新高", "AI助力智能制造", "油价波动影响能源股"];
-    setInterval(() => {
-      const news = document.createElement("li");
-      news.className = "list-group-item";
-      news.textContent = newsPool[Math.floor(Math.random()*newsPool.length)];
-      newsList.prepend(news);
-      if (newsList.childElementCount > 5) newsList.removeChild(newsList.lastChild);
-    }, 4000);
+    const newsData = [
+      { time: "10:35", title: "央行：继续实施稳健的货币政策" },
+      { time: "10:12", title: "新能源汽车销量创新高" },
+      { time: "09:45", title: "A股成交额突破万亿" },
+      { time: "09:30", title: "北向资金净流入超50亿" }
+    ];
 
-    // 股吧论坛动态发言
+    newsData.forEach(news => {
+      const newsItem = document.createElement("div");
+      newsItem.className = "news-item";
+      newsItem.innerHTML = `
+        <div class="news-time">${news.time}</div>
+        <div class="news-title">${news.title}</div>
+      `;
+      newsList.appendChild(newsItem);
+    });
+
+    const hotStocks = document.getElementById("hotStocks");
+    const stocksData = [
+      { code: "002594", name: "比亚迪", change: "+4.2%", up: true },
+      { code: "600519", name: "贵州茅台", change: "-2.1%", up: false },
+      { code: "300750", name: "宁德时代", change: "+3.5%", up: true },
+      { code: "000001", name: "平安银行", change: "+1.8%", up: true }
+    ];
+
+    const table = document.createElement("table");
+    table.className = "table-custom";
+    table.innerHTML = `
+      <thead>
+        <tr>
+          <th>代码</th>
+          <th>名称</th>
+          <th>涨跌幅</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${stocksData.map(stock => `
+          <tr>
+            <td>${stock.code}</td>
+            <td>${stock.name}</td>
+            <td><span class="${stock.up ? 'ticker-up' : 'ticker-down'}">${stock.change}</span></td>
+          </tr>
+        `).join('')}
+      </tbody>
+    `;
+    hotStocks.appendChild(table);
+
     const forum = document.getElementById("forum");
-    const users = ["股民老张", "AI小散", "价值投资者", "趋势跟随者"];
-    const messages = ["今天行情不错！", "科技股要起飞了吗？", "感觉还会震荡。", "继续看多新能源！"];
-    setInterval(() => {
+    const users = ["股神巴菲特", "价值投资者", "短线高手", "AI量化"];
+    const messages = [
+      "今天大盘走势不错！",
+      "新能源板块要起飞了",
+      "建议关注科技龙头",
+      "短期可能有震荡"
+    ];
+
+    function addForumMessage() {
       const msg = document.createElement("div");
-      msg.textContent = users[Math.floor(Math.random()*users.length)] + "：" + messages[Math.floor(Math.random()*messages.length)];
+      msg.className = "forum-message";
+      msg.innerHTML = `
+        <span class="forum-user">${users[Math.floor(Math.random()*users.length)]}</span>
+        <span class="forum-text">${messages[Math.floor(Math.random()*messages.length)]}</span>
+      `;
       forum.appendChild(msg);
+      if (forum.children.length > 5) forum.removeChild(forum.firstChild);
       forum.scrollTop = forum.scrollHeight;
-    }, 5000);
+    }
+
+    addForumMessage();
+    addForumMessage();
+    setInterval(addForumMessage, 5000);
   </script>
 </body>
 </html>
