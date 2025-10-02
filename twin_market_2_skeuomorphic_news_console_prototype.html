@@ -1,0 +1,383 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>TwinMarket2 — News Console (Prototype)</title>
+  <style>
+    /* Reset */
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;background:#1a1a1a;font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; color:#eaeaea}
+
+    /* Container */
+    .console{width:1100px;margin:28px auto;padding:20px;border-radius:14px;background:linear-gradient(180deg,#0f1113 0%, #141618 60%);box-shadow:0 30px 80px rgba(0,0,0,.8), inset 0 1px 0 rgba(255,255,255,0.02);display:grid;grid-template-rows:80px 1fr 160px;gap:18px}
+
+    /* TOP - signal + clock */
+    .top{display:flex;align-items:center;justify-content:space-between;padding:12px 18px;background:linear-gradient(180deg,#0c0d0e,#111314);border-radius:10px;border:1px solid rgba(255,255,255,0.03)}
+    .clock{font-family:monospace;background:#060606;border-radius:6px;padding:8px 12px;display:flex;align-items:center;gap:12px;box-shadow:inset 0 -6px 18px rgba(0,0,0,.7)}
+    .clock .time{font-size:18px;letter-spacing:1px}
+    .signal{display:flex;align-items:center;gap:12px}
+    .leds{display:flex;gap:6px}
+    .led{width:12px;height:12px;border-radius:50%;background:#224422;box-shadow:0 1px 2px rgba(0,0,0,.8),0 0 6px rgba(0,0,0,.6) inset}
+    .led.on.green{background:linear-gradient(180deg,#75ff88,#2bb24a);box-shadow:0 0 8px rgba(44,220,90,.7)}
+    .led.on.yellow{background:linear-gradient(180deg,#ffe57a,#e7b200);box-shadow:0 0 8px rgba(255,200,60,.7)}
+    .led.on.red{background:linear-gradient(180deg,#ff8b8b,#e23b3b);box-shadow:0 0 10px rgba(255,80,80,.7)}
+
+    /* radar */
+    .radar{width:160px;height:60px;border-radius:8px;background:linear-gradient(180deg,#070708,#0e1112);display:flex;align-items:center;justify-content:center;padding:8px;border:1px solid rgba(255,255,255,.03)}
+    /* MID - editor */
+    .mid{display:grid;grid-template-columns:1fr 420px;gap:18px}
+
+    /* Headline box */
+    .headline{background:linear-gradient(180deg,#cfcfcf,#bfbfbf);padding:12px;border-radius:10px;border:4px solid #9a9a9a;box-shadow:0 6px 18px rgba(0,0,0,.6);position:relative}
+    .headline .label{position:absolute;left:12px;top:-18px;background:#2b2b2b;padding:6px 10px;border-radius:6px;font-weight:700;letter-spacing:1px;font-size:12px}
+    .headline input{width:100%;font-size:20px;padding:14px;border-radius:6px;border:1px solid rgba(0,0,0,.2);outline:none;background:linear-gradient(180deg,#fbfbfb,#f2f2f2);box-shadow:inset 0 -6px 16px rgba(0,0,0,.06)}
+
+    /* Content area - paper texture */
+    .content{margin-top:12px;background:linear-gradient(180deg,#fffdf6,#f7f3ea);border-radius:8px;padding:14px;height:320px;overflow:auto;border:1px solid rgba(0,0,0,.06);box-shadow:inset 0 0 0 1px rgba(0,0,0,.02)}
+    .content .label{position:absolute;left:24px;top:92px;background:transparent;font-weight:700;color:#333}
+    .content textarea{width:100%;height:100%;resize:none;border:none;background:transparent;font-size:14px;line-height:1.6;color:#222}
+    .paper-edges{position:absolute;pointer-events:none;}
+
+    /* Right panel - controls */
+    .controls{background:linear-gradient(180deg,#101214,#0b0c0d);border-radius:12px;padding:16px;border:1px solid rgba(255,255,255,.03);display:flex;flex-direction:column;gap:12px}
+    .control-row{display:flex;justify-content:space-between;align-items:center}
+    .ctrl-label{font-size:12px;color:#bfbfbf}
+
+    /* toggle switch (impact) */
+    .impact{display:flex;gap:8px;align-items:center}
+    .toggle-group{background:#0b0b0b;padding:6px;border-radius:8px;border:1px solid rgba(255,255,255,.02);display:flex;gap:6px}
+    .toggle{padding:8px 12px;border-radius:6px;background:linear-gradient(180deg,#1f1f1f,#0f0f0f);cursor:pointer;border:1px solid rgba(255,255,255,.02);box-shadow:inset 0 -6px 12px rgba(0,0,0,.6)}
+    .toggle.active{background:linear-gradient(180deg,#ffd8d8,#ffc7c7);color:#2b0707;border-color:rgba(0,0,0,.4);box-shadow:inset 0 6px 12px rgba(255,255,255,.03)}
+
+    /* rotary knob (sentiment) */
+    .knob-wrap{width:120px;text-align:center}
+    .knob{width:76px;height:76px;border-radius:50%;background:linear-gradient(180deg,#111,#333);border:6px solid #0b0b0b;position:relative;margin:0 auto;box-shadow:0 6px 18px rgba(0,0,0,.6), inset 0 -10px 25px rgba(255,255,255,.02)}
+    .knob .pointer{width:4px;height:34px;background:linear-gradient(180deg,#eaeaea,#bdbdbd);position:absolute;left:50%;transform-origin:50% 70%;top:8px;border-radius:2px;transform:translateX(-50%) rotate(-90deg);transition:transform .15s cubic-bezier(.2,.9,.2,1)}
+    .knob .scale{font-size:12px;margin-top:8px;color:#9aa0a6}
+    input[type=range]{width:100%;appearance:none;background:transparent}
+    input[type=range]::-webkit-slider-thumb{appearance:none}
+
+    /* source selector - vintage dial */
+    .source{display:flex;flex-direction:column;gap:6px}
+    .dial{background:linear-gradient(180deg,#202020,#0f0f0f);padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,.03)}
+    .dial select{width:100%;padding:8px;border-radius:6px;border:none;background:linear-gradient(180deg,#121212,#0a0a0a);color:#eaeaea}
+
+    /* release button with cover */
+    .release{display:flex;gap:10px;align-items:center}
+    .cover{width:72px;height:48px;background:#2b2b2b;border-radius:6px;border:2px solid rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;position:relative}
+    .cover .latch{position:absolute;top:-14px;left:10px;background:#444;padding:4px 6px;border-radius:6px;font-size:10px}
+    .broadcast-btn{background:linear-gradient(180deg,#d54d4d,#b12727);color:white;padding:12px 18px;border-radius:999px;border:6px solid rgba(0,0,0,.25);font-weight:800;cursor:pointer;box-shadow:0 12px 40px rgba(177,41,41,.28);transform:translateY(0);transition:transform .08s ease}
+    .broadcast-btn:active{transform:translateY(3px)}
+    .recall-btn{background:linear-gradient(180deg,#3b6ea6,#275a8f);padding:10px 12px;border-radius:8px;border:1px solid rgba(0,0,0,.35);cursor:pointer}
+
+    /* bottom - broadcast & status */
+    .bottom{display:flex;gap:18px;align-items:flex-start}
+    .big-actions{flex:1;background:linear-gradient(180deg,#0e1012,#071011);padding:18px;border-radius:12px;border:1px solid rgba(255,255,255,.03);display:flex;align-items:center;gap:18px}
+    .status{width:360px;background:linear-gradient(180deg,#030404,#0b0b0b);padding:12px;border-radius:10px;border:4px solid #070808;color:#8ef0c3;font-family:monospace}
+    .status .line{height:22px;overflow:hidden}
+
+    /* waveform canvas */
+    #wave{width:100%;height:60px;background:linear-gradient(180deg,#021012,#052028);border-radius:8px}
+
+    /* little helpers */
+    label.small{font-size:12px;color:#9aa0a6}
+
+    /* responsiveness */
+    @media (max-width:1200px){.console{width:96%}}
+  </style>
+</head>
+<body>
+  <div class="console" role="application" aria-label="TwinMarket2 News Console Prototype">
+
+    <!-- TOP -->
+    <div class="top">
+      <div class="clock" aria-hidden>
+        <div class="time" id="clock">2025-10-02 10:30:00</div>
+        <div class="tz">(模拟时)</div>
+      </div>
+
+      <div class="radar" aria-hidden>
+        <canvas id="radarCanvas" width="160" height="44"></canvas>
+      </div>
+
+      <div class="signal">
+        <div class="leds" id="leds">
+          <div class="led on green" data-state="ok" title="Signal A"></div>
+          <div class="led on green" data-state="ok" title="Signal B"></div>
+          <div class="led on green" data-state="ok" title="Signal C"></div>
+        </div>
+        <div style="font-size:12px;color:#9aa0a6">系统状态</div>
+      </div>
+    </div>
+
+    <!-- MID: editor & controls -->
+    <div class="mid">
+      <div style="position:relative">
+        <div class="headline">
+          <div class="label">NEWS HEADLINE</div>
+          <input id="headline" value="TwinMarket2 模拟市场出现大幅度波动，部分科技股交易暂停" />
+        </div>
+
+        <div class="content" style="margin-top:14px;position:relative">
+          <textarea id="content">今日早盘，TwinMarket2 模拟市场受不明消息影响，科技板块交易量激增，数只高科技股票触发熔断机制。有分析师指出，此次波动可能与近期 LLM-Agent 行为模式的异常变化有关。</textarea>
+        </div>
+      </div>
+
+      <div class="controls">
+        <div class="control-row">
+          <div>
+            <div class="ctrl-label">影响力 (Impact Level)</div>
+            <div class="impact" style="margin-top:8px">
+              <div class="toggle-group" id="impactGroup">
+                <div class="toggle" data-val="low">LOW</div>
+                <div class="toggle active" data-val="medium">MEDIUM</div>
+                <div class="toggle" data-val="high">HIGH</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="control-row">
+          <div class="ctrl-label">情绪倾向 (Sentiment)</div>
+          <div class="knob-wrap">
+            <div class="knob" id="knob">
+              <div class="pointer" id="knobPointer"></div>
+            </div>
+            <input type="range" id="sentimentRange" min="-100" max="100" value="-10" />
+            <div class="scale">负面 ← → 正面</div>
+          </div>
+        </div>
+
+        <div class="control-row">
+          <div class="ctrl-label">来源 (Source)</div>
+          <div class="source">
+            <div class="dial">
+              <select id="sourceSel">
+                <option>官方通报</option>
+                <option selected>市场传闻</option>
+                <option>匿名内幕</option>
+                <option>分析师报告</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="control-row">
+          <div>
+            <div class="ctrl-label">发布时间 (Release Time)</div>
+            <div style="display:flex;gap:6px;margin-top:8px;align-items:center">
+              <input id="releaseTime" type="datetime-local" style="background:#090909;color:#eaeaea;padding:8px;border-radius:6px;border:none" />
+              <div class="release">
+                <div class="cover" id="cover">
+                  <div class="latch">COVER</div>
+                </div>
+                <button class="broadcast-btn" id="broadcast">BROADCAST NEWS</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top:6px;display:flex;gap:8px;justify-content:space-between;align-items:center">
+          <button class="recall-btn" id="recall">RECALL NEWS</button>
+          <div style="font-size:12px;color:#8b98a0">发布历史会保存在控制台右侧</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BOTTOM: waveform + status -->
+    <div class="bottom">
+      <div class="big-actions">
+        <div style="flex:1">
+          <div class="ctrl-label">市场反馈示波器</div>
+          <canvas id="wave" height="60"></canvas>
+        </div>
+        <div style="width:220px;display:flex;flex-direction:column;gap:8px">
+          <div class="ctrl-label">快速统计</div>
+          <div style="background:#041016;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,.02);font-size:13px">
+            <div>波动率: <span id="vol">+0.6%</span></div>
+            <div>Agent A: <span id="agentA">观察中</span></div>
+            <div>Agent B: <span id="agentB">等待采样</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="status" aria-live="polite" id="statusBox">
+        <div class="line">系统准备就绪。等待发布操作...</div>
+        <div class="line" id="statusLog" style="margin-top:8px;font-size:12px;color:#b7f6d0"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // --- Utilities: Simple audio using WebAudio API ---
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    function clickSound(freq=880, dur=0.04){
+      const o = audioCtx.createOscillator();
+      const g = audioCtx.createGain();
+      o.type = 'sine'; o.frequency.value=freq;
+      g.gain.value=0.06;
+      o.connect(g); g.connect(audioCtx.destination);
+      o.start();
+      o.stop(audioCtx.currentTime+dur);
+    }
+    function broadcastTone(){
+      const o = audioCtx.createOscillator();
+      const g = audioCtx.createGain();
+      o.type='sawtooth'; o.frequency.value=520;
+      g.gain.value=0.12;
+      o.connect(g); g.connect(audioCtx.destination);
+      o.start();
+      g.gain.exponentialRampToValueAtTime(0.0001,audioCtx.currentTime+0.6);
+      o.stop(audioCtx.currentTime+0.7);
+    }
+
+    // --- Clock ---
+    const clockEl = document.getElementById('clock');
+    function setClock(d){
+      const pad = n=>String(n).padStart(2,'0');
+      const s = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+      clockEl.textContent = s;
+    }
+    // initialize with given date then tick from there
+    let base = new Date('2025-10-02T10:30:00');
+    setClock(base);
+    setInterval(()=>{ base = new Date(base.getTime()+1000); setClock(base); },1000);
+
+    // --- Radar animation ---
+    const radar = document.getElementById('radarCanvas');
+    const rctx = radar.getContext('2d');
+    let radarAngle = 0;
+    function drawRadar(){
+      rctx.clearRect(0,0,radar.width,radar.height);
+      // background
+      rctx.fillStyle='rgba(10,12,12,0.6)'; rctx.fillRect(0,0,radar.width,radar.height);
+      // arcs
+      rctx.strokeStyle='rgba(40,255,120,0.06)'; rctx.lineWidth=1;
+      for(let i=1;i<=3;i++){ rctx.beginPath(); rctx.arc(80,22,i*20,Math.PI,2*Math.PI); rctx.stroke(); }
+      // sweeping beam
+      radarAngle += 0.03;
+      const g = rctx.createLinearGradient(0,0,radar.width,0);
+      g.addColorStop(0,'rgba(120,255,160,0.02)'); g.addColorStop(1,'rgba(120,255,160,0.15)');
+      rctx.fillStyle=g;
+      rctx.beginPath();
+      rctx.moveTo(80,22);
+      const p = 0.6; // beam width
+      for(let a=radarAngle-p;a<=radarAngle+p;a+=0.02){
+        rctx.lineTo(80+Math.cos(a)*80,22+Math.sin(a)*40);
+      }
+      rctx.closePath(); rctx.fill();
+      requestAnimationFrame(drawRadar);
+    }
+    drawRadar();
+
+    // --- LEDs subtle pulse ---
+    const leds = document.querySelectorAll('.led');
+    setInterval(()=>{
+      leds.forEach((led,i)=>{
+        if(Math.random()>0.98 && led.classList.contains('on')){
+          led.style.transform='scale(1.25)'; setTimeout(()=>led.style.transform='scale(1)',120)
+        }
+      })
+    },300);
+
+    // --- Knob handling ---
+    const knobPointer = document.getElementById('knobPointer');
+    const sentiment = document.getElementById('sentimentRange');
+    function updateKnob(){
+      const v = Number(sentiment.value); // -100..100
+      const deg = (v/100)*90; // -90 .. +90
+      knobPointer.style.transform = `translateX(-50%) rotate(${deg}deg)`;
+    }
+    sentiment.addEventListener('input',()=>{ updateKnob(); clickSound(600,0.02) });
+    updateKnob();
+
+    // --- Impact toggles ---
+    const impactGroup = document.getElementById('impactGroup');
+    impactGroup.addEventListener('click', e=>{
+      const t = e.target.closest('.toggle'); if(!t) return; clickSound(900,0.02);
+      [...impactGroup.children].forEach(ch=>ch.classList.remove('active'));
+      t.classList.add('active');
+      // flash a LED if high
+      const state = t.dataset.val;
+      if(state==='high'){
+        leds[2].classList.remove('green'); leds[2].classList.add('on','red');
+        setTimeout(()=>{ leds[2].classList.remove('red'); leds[2].classList.add('green') },1200);
+      }
+    });
+
+    // --- Waveform (market feedback) ---
+    const wave = document.getElementById('wave');
+    const wctx = wave.getContext('2d');
+    let intensity = 0.3; // baseline
+    function drawWave(){
+      const W = wave.width = wave.clientWidth*devicePixelRatio;
+      const H = wave.height = 60*devicePixelRatio;
+      wctx.clearRect(0,0,W,H);
+      // background gradient
+      const g = wctx.createLinearGradient(0,0,W,0); g.addColorStop(0,'rgba(120,255,190,0.03)'); g.addColorStop(1,'rgba(120,255,190,0.06)');
+      wctx.fillStyle=g; wctx.fillRect(0,0,W,H);
+      // waveform
+      wctx.beginPath();
+      const amp = H*0.28*intensity; const mid = H/2;
+      for(let x=0;x<W;x++){
+        const t = x/W*6.28*2 + performance.now()/600;
+        const y = mid + Math.sin(t*(0.5+Math.sin(x/40)/4)) * (amp*(0.5+Math.random()*0.6));
+        if(x===0) wctx.moveTo(x,y); else wctx.lineTo(x,y);
+      }
+      wctx.lineWidth = 2*devicePixelRatio;
+      wctx.strokeStyle = 'rgba(110,220,160,0.95)';
+      wctx.stroke();
+      requestAnimationFrame(drawWave);
+    }
+    drawWave();
+
+    // --- Broadcast logic ---
+    const broadcastBtn = document.getElementById('broadcast');
+    const cover = document.getElementById('cover');
+    const statusLog = document.getElementById('statusLog');
+    const statusBox = document.getElementById('statusBox');
+    const volEl = document.getElementById('vol');
+    const agentA = document.getElementById('agentA'), agentB = document.getElementById('agentB');
+
+    // cover toggle behavior (click to open cover)
+    cover.addEventListener('click',()=>{ clickSound(700,0.03); cover.style.transform='translateY(-6px)'; cover.style.boxShadow='0 8px 24px rgba(0,0,0,.6)'; setTimeout(()=>{cover.style.transform='translateY(0)';cover.style.boxShadow='none'},220)});
+
+    broadcastBtn.addEventListener('click', async ()=>{
+      // make sure audio resume on gesture
+      if(audioCtx.state==='suspended') await audioCtx.resume();
+      clickSound(1200,0.03); broadcastTone();
+      // visual feedback
+      broadcastBtn.textContent='BROADCASTING...'; broadcastBtn.disabled=true; broadcastBtn.style.opacity=0.95;
+      // increase intensity and update status lines
+      intensity = 1.6;
+      statusLog.textContent = '新闻已发布，正在 Agent 网络中传播...';
+      volEl.textContent = '+3.9%';
+      agentA.textContent = '收到，调整仓位 +20%'; agentB.textContent = '开始减仓科技股';
+      // flash leds and radar
+      leds.forEach((l,i)=>{ l.classList.add('on'); l.classList.add(i===0? 'green':'' )});
+      // simulate timeline
+      setTimeout(()=>{ statusLog.textContent = 'Agent C 报告：市场波动率上升 5.3%'; volEl.textContent = '+5.3%'; },1200);
+      setTimeout(()=>{ statusLog.textContent = '新闻传播完成。请查看分析面板。'; broadcastBtn.textContent='BROADCAST NEWS'; broadcastBtn.disabled=false; intensity=0.45; clickSound(800,0.02)},3200);
+    });
+
+    // --- Recall ---
+    document.getElementById('recall').addEventListener('click', ()=>{
+      clickSound(520,0.02);
+      statusLog.textContent = '撤回请求已发送，正在尝试在网络中撤回...';
+      volEl.textContent = '+1.2%'; agentA.textContent='回撤中'; agentB.textContent='恢复观望';
+      intensity = 0.6;
+      setTimeout(()=>{ statusLog.textContent='撤回失败：部分 Agent 已执行交易。'; clickSound(400,0.02); },1800);
+    });
+
+    // --- set default release time to now ---
+    const releaseTime = document.getElementById('releaseTime');
+    const nowISO = new Date().toISOString().slice(0,16); releaseTime.value = nowISO;
+
+    // Accessibility: announce status changes
+    const obs = new MutationObserver(()=>{ statusBox.setAttribute('aria-busy','true'); setTimeout(()=>statusBox.removeAttribute('aria-busy'),600) });
+    obs.observe(statusLog,{childList:true});
+
+  </script>
+</body>
+</html>
